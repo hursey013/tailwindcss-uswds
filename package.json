@@ -1,0 +1,22 @@
+{
+  "name": "@hursey013/tailwindcss-uswds",
+  "version": "1.0.0",
+  "description": "U.S. Tailwind Design System",
+  "main": "src/index.js",
+  "author": "Brian Hurst",
+  "license": "MIT",
+  "scripts": {
+    "build:clean": "rm -rf ./build",
+    "prebuild": "npm run build:clean",
+    "build": "node ./scripts/build.js",
+    "prepare": "npm run build"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^1.0"
+  },
+  "dependencies": {
+    "mkdirp": "^1.0.4",
+    "tailwindcss": "^1.4.6",
+    "uswds": "^2.7.0"
+  }
+}
