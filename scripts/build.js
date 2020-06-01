@@ -30,7 +30,7 @@ function flatten(array) {
   }, {});
 }
 
-const colors = readFilesSync("node_modules/uswds/src/data/colors/").reduce(
+const colors = readFilesSync("./node_modules/uswds/src/data/colors/").reduce(
   (acc, file) => {
     return { ...acc, ...flatten(file.props) };
   },
@@ -39,7 +39,7 @@ const colors = readFilesSync("node_modules/uswds/src/data/colors/").reduce(
 
 console.info("Building USTWDS color palette!");
 
-mkdirp("build").then(made => {
-  fs.writeFileSync("build/colors.json", JSON.stringify(colors));
+mkdirp("./build").then(made => {
+  fs.writeFileSync("./build/colors.json", JSON.stringify(colors));
   console.log("Finished building.");
 });
