@@ -1,6 +1,6 @@
 {
   "name": "@hursey013/tailwindcss-uswds",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "U.S. Tailwind Design System",
   "main": "src/index.js",
   "repository": {
@@ -13,7 +13,7 @@
     "build:clean": "rm -rf build",
     "prebuild": "npm run build:clean",
     "build": "node scripts/build.js",
-    "prepublish": "npm run build"
+    "postinstall": "npm run build"
   },
   "peerDependencies": {
     "tailwindcss": "^1.0"
