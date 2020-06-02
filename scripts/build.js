@@ -41,7 +41,7 @@ const colors = readFilesSync(
 
 console.info("Building USTWDS color palette!");
 
-mkdirp("./build").then(made => {
-  fs.writeFileSync("./build/colors.json", JSON.stringify(colors));
+mkdirp("build").then(made => {
+  fs.writeFileSync("build/colors.json", JSON.stringify(colors));
   console.log("Finished building.");
 });
