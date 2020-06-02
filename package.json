@@ -1,6 +1,6 @@
 {
   "name": "@hursey013/tailwindcss-uswds",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "U.S. Tailwind Design System",
   "main": "src/index.js",
   "repository": {

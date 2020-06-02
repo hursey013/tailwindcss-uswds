@@ -30,12 +30,14 @@ function flatten(array) {
   }, {});
 }
 
-const colors = readFilesSync("./node_modules/uswds/src/data/colors/").reduce(
-  (acc, file) => {
-    return { ...acc, ...flatten(file.props) };
-  },
-  {}
-);
+const colors = readFilesSync(
+  path.join(
+    path.dirname(require.resolve("uswds/package.json")),
+    "/src/data/colors/"
+  )
+).reduce((acc, file) => {
+  return { ...acc, ...flatten(file.props) };
+}, {});
 
 console.info("Building USTWDS color palette!");
 
