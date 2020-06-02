@@ -1,5 +1,5 @@
 const plugin = require("tailwindcss/plugin");
-const colors = require("./build/colors.json");
+const colors = require("../build/colors.json");
 
 module.exports = plugin(
   function({ addBase, theme }) {
