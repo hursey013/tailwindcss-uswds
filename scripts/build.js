@@ -17,13 +17,17 @@ function readFilesSync(dir) {
   return files;
 }
 
-function flatten(array) {
+function flatten(array, vivid = false) {
   return array.reduce((acc, item) => {
     if (Array.isArray(item.value)) {
-      acc[item.name] = flatten(item.value);
+      if (item.name === "vivid") {
+        return { ...acc, ...flatten(item.value, true) };
+      } else {
+        acc[item.name] = flatten(item.value);
+      }
     } else {
       if (item.value) {
-        acc[item.name] = item.value;
+        acc[vivid ? `${item.name}v` : item.name] = item.value;
       }
     }
     return acc;
@@ -43,5 +47,6 @@ console.info("Building USTWDS color palette!");
 
 mkdirp("build").then(made => {
   fs.writeFileSync("build/colors.json", JSON.stringify(colors));
+  console.log(JSON.stringify(colors, null, 4));
   console.log("Finished building.");
 });
