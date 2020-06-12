@@ -10,7 +10,7 @@
   "author": "Brian Hurst",
   "license": "MIT",
   "scripts": {
-    "build:clean": "rm -rf build",
+    "build:clean": "rimraf build",
     "prebuild": "npm run build:clean",
     "build": "node scripts/build.js",
     "postinstall": "npm run build"
@@ -27,5 +27,7 @@
     "url": "https://github.com/hursey013/tailwindcss-uswds/issues"
   },
   "homepage": "https://github.com/hursey013/tailwindcss-uswds#readme",
-  "devDependencies": {}
+  "devDependencies": {
+    "rimraf": "^3.0.2"
+  }
 }
