@@ -1,52 +1,94 @@
 const fs = require("fs");
 const path = require("path");
 const mkdirp = require("mkdirp");
+const sassExtract = require("sass-extract");
 
-function readFilesSync(dir) {
-  const files = [];
+const rendered = sassExtract.renderSync({
+  file: path.join(
+    path.dirname(require.resolve("uswds/package.json")),
+    "/src/stylesheets/uswds.scss"
+  )
+});
 
-  fs.readdirSync(dir).forEach(filename => {
-    const filepath = path.resolve(dir, filename);
-    const stat = fs.statSync(filepath);
-    const isFile = stat.isFile();
-    const contents = fs.readFileSync(dir + filename, "utf8");
+const colors = flattenColors(
+  rendered.vars.global["$palettes-color"].value["palette-color"].value
+);
 
-    if (isFile) files.push(JSON.parse(contents));
-  });
+const fontWeights = flattenFontsWeights(
+  rendered.vars.global["$project-font-weights"].value
+);
 
-  return files;
-}
+const fonts = flattenFonts(
+  rendered.vars.global["$system-typeface-tokens"].value
+);
 
-function flatten(array, vivid = false) {
-  return array.reduce((acc, item) => {
-    if (Array.isArray(item.value)) {
-      if (item.name === "vivid") {
-        return { ...acc, ...flatten(item.value, true) };
+const spacing = flattenSpacing({
+  ...rendered.vars.global["$palettes-units"].value,
+  ...rendered.vars.global["$palettes-units-misc"].value
+});
+
+function flattenColors(obj) {
+  return Object.keys(obj).reduce((acc, key) => {
+    if (obj[key].value) {
+      if (obj[key].value.a !== 1) {
+        acc[
+          key
+        ] = `rgba(${obj[key].value.r}, ${obj[key].value.g}, ${obj[key].value.b}, ${obj[key].value.a})`;
       } else {
-        acc[item.name] = flatten(item.value);
-      }
-    } else {
-      if (item.value) {
-        acc[vivid ? `${item.name}v` : item.name] = item.value;
+        acc[key] = obj[key].value.hex;
       }
     }
     return acc;
   }, {});
 }
 
-const colors = readFilesSync(
-  path.join(
-    path.dirname(require.resolve("uswds/package.json")),
-    "/src/data/colors/"
-  )
-).reduce((acc, file) => {
-  return { ...acc, ...flatten(file.props) };
-}, {});
+function flattenFonts(obj) {
+  return Object.keys(obj)
+    .filter(key => obj[key].value.src)
+    .map(key => {
+      const {
+        roman: { value: normal },
+        italic: { value: italic }
+      } = obj[key].value.src.value;
 
-console.info("Building USTWDS color palette!");
+      return {
+        dir: key,
+        family: obj[key].value["display-name"].value,
+        normal: Object.keys(normal)
+          .filter(key => normal[key].value && fontWeights.includes(+key))
+          .reduce((acc, key) => ({ ...acc, [key]: normal[key].value }), {}),
+        italic: Object.keys(italic)
+          .filter(key => italic[key].value && fontWeights.includes(+key))
+          .reduce((acc, key) => ({ ...acc, [key]: italic[key].value }), {})
+      };
+    });
+}
+
+function flattenFontsWeights(obj) {
+  return Object.keys(obj)
+    .filter(key => obj[key].value)
+    .map(key => obj[key].value);
+}
+
+function flattenSpacing(obj) {
+  return Object.keys(obj).reduce((acc, key) => {
+    if (typeof obj[key].value === "object") {
+      return { ...acc, [key]: flattenSpacing(obj[key].value) };
+    } else {
+      acc[key] = `${obj[key].value}${obj[key].unit ? obj[key].unit : ""}`;
+    }
+    return acc;
+  }, {});
+}
+
+console.info("Exctracting USWDS values!");
 
 mkdirp("build").then(made => {
   fs.writeFileSync("build/colors.json", JSON.stringify(colors));
-  console.log(JSON.stringify(colors, null, 4));
-  console.log("Finished building.");
+  console.info(JSON.stringify(colors, null, 4));
+  fs.writeFileSync("build/fonts.json", JSON.stringify(fonts));
+  console.info(JSON.stringify(fonts, null, 4));
+  fs.writeFileSync("build/spacing.json", JSON.stringify(spacing));
+  console.info(JSON.stringify(spacing, null, 4));
+  console.info("Finished extraction.");
 });

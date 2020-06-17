@@ -1,119 +1,140 @@
 const plugin = require("tailwindcss/plugin");
 const colors = require("../build/colors.json");
+const spacing = require("../build/spacing.json");
+const fonts = require("../build/fonts.json");
 
-module.exports = plugin(
-  function({ addBase, theme }) {
-    addBase({
-      a: {
-        color: theme("colors.primary.default"),
-        "&:visited": {
-          color: theme("colors.violet.70v")
-        },
-        "&:hover": {
-          color: theme("colors.primary.dark")
-        },
-        "&:active": {
-          color: theme("colors.primary.darker")
-        }
-      },
-      body: {
-        backgroundColor: theme("colors.white"),
-        color: theme("colors.ink"),
-        overflowX: "hidden"
-      }
-    });
-  },
-  {
-    theme: {
-      colors: {
-        ...colors,
-        base: {
-          lightest: colors.gray["5"],
-          lighter: colors["gray-cool"]["10"],
-          light: colors["gray-cool"]["30"],
-          default: colors["gray-cool"]["50"],
-          dark: colors["gray-cool"]["60"],
-          darker: colors["gray-cool"]["70"],
-          darkest: colors.gray["90"]
-        },
-        ink: colors.gray["90"],
-        primary: {
-          lightest: false,
-          lighter: colors.blue["10"],
-          light: colors.blue["30"],
-          default: colors.blue["60v"],
-          vivid: colors["blue-warm"]["60v"],
-          dark: colors["blue-warm"]["70v"],
-          darker: colors["blue-warm"]["80v"],
-          darkest: false
-        },
-        secondary: {
-          lightest: false,
-          lighter: colors["red-cool"]["10"],
-          light: colors.red["30"],
-          default: colors.red["50"],
-          vivid: colors["red-cool"]["50v"],
-          dark: colors.red["60v"],
-          darker: colors.red["70v"],
-          darkest: false
-        },
-        accent: {
-          warm: {
-            lightest: false,
-            lighter: colors.orange["10"],
-            light: colors.orange["20v"],
-            default: colors.orange["30v"],
-            dark: colors.orange["50v"],
-            darker: colors.orange["60"],
-            darkest: false
-          },
-          cool: {
-            lightest: false,
-            lighter: colors["blue-cool"]["5v"],
-            light: colors["blue-cool"]["20v"],
-            default: colors.cyan["30v"],
-            dark: colors["blue-cool"]["40v"],
-            darker: colors["blue-cool"]["60v"],
-            darkest: false
+module.exports = plugin.withOptions(
+  function(options = {}) {
+    return function({ addBase, theme }) {
+      let base = [
+        {
+          a: {
+            color: theme("colors.primary"),
+            "&:visited": {
+              color: theme("colors['violet-70v']")
+            },
+            "&:hover": {
+              color: theme("colors['primary-dark']")
+            },
+            "&:active": {
+              color: theme("colors['primary-darker']")
+            }
           }
         },
-        info: {
-          lighter: colors.cyan["5"],
-          light: colors.cyan["20"],
-          default: colors.cyan["30v"],
-          dark: colors.cyan["40v"],
-          darker: colors["blue-cool"]["60"]
+        {
+          body: {
+            backgroundColor: theme("colors.white"),
+            color: theme("colors.ink"),
+            overflowX: "hidden"
+          }
+        }
+      ];
+
+      // if (options.fontPath) {
+      //   base = [
+      //     ...base,
+      //     fonts.map(font => {
+      //       return {
+      //         "@font-face": {
+      //           fontFamily: font.family,
+      //           fontStyle: font.style,
+      //           fontWeight: font.weight,
+      //           fontDisplay: "fallback",
+      //           src: `url(${options.fontPath}/${font.dir}/${font.file}.woff2) format("woff2"), url(${options.fontPath}/${font.dir}/${font.file}.woff) format("woff"), url(${options.fontPath}/${font.dir}/${font.file}.ttf) format("truetype")`
+      //         }
+      //       };
+      //     })
+      //   ];
+      // }
+
+      addBase(base);
+    };
+  },
+  function(options) {
+    return {
+      theme: {
+        screens: {
+          ...spacing["palette-units-system-positive-large"],
+          ...spacing["palette-units-system-positive-larger"],
+          ...spacing["palette-units-system-positive-largest"]
         },
-        error: {
-          lighter: colors["red-warm"]["10"],
-          light: colors["red-warm"]["30v"],
-          default: colors["red-warm"]["50v"],
-          dark: colors.red["60v"],
-          darker: colors.red["70"]
+        colors,
+        spacing: {
+          ...spacing["palette-units-system-positive-smaller"],
+          ...spacing["palette-units-system-positive-small"],
+          ...spacing["palette-units-system-positive-medium"],
+          ...spacing["palette-units-zero"]
         },
-        warning: {
-          lighter: colors.yellow["5"],
-          light: colors.yellow["10v"],
-          default: colors.gold["20v"],
-          dark: colors.gold["30v"],
-          darker: colors.gold["50v"]
+        borderRadius: {
+          ...spacing["palette-units-system-positive-smaller"],
+          ...spacing["palette-units-system-positive-small"],
+          ...spacing["palette-units-zero"],
+          sm: "2px",
+          md: "4px",
+          lg: "8px",
+          pill: "99rem"
         },
-        success: {
-          lighter: colors["green-cool"]["5"],
-          light: colors["green-cool"]["20v"],
-          default: colors["green-cool"]["40v"],
-          dark: colors["green-cool"]["50"],
-          darker: colors["green-cool"]["60"]
+        borderWidth: {
+          default: "1px",
+          ...spacing["palette-units-system-positive-smaller"],
+          ...spacing["palette-units-system-positive-small"],
+          ...spacing["palette-units-zero"]
         },
-        disabled: {
-          light: colors.gray["10"],
-          default: colors.gray["20"],
-          dark: colors.gray["30"]
+        fontFamily: {
+          display: ["Roboto Mono", "sans-serif"],
+          body: ["Roboto Mono", "sans-serif"]
         },
-        transparent: "transparent",
-        black: "black",
-        white: "white"
+        height: theme => ({
+          auto: "auto",
+          ...theme("spacing"),
+          ...spacing["palette-units-system-positive-large"],
+          full: "100%",
+          viewport: "100vh"
+        }),
+        margin: theme => ({
+          auto: "auto",
+          ...theme("spacing"),
+          ...spacing["palette-units-system-positive-large"]
+        }),
+        maxHeight: theme => ({
+          none: "none",
+          ...theme("spacing"),
+          ...spacing["palette-units-system-positive-large"],
+          ...spacing["palette-units-system-positive-larger"],
+          viewport: "100vh"
+        }),
+        maxWidth: theme => ({
+          none: "none",
+          ...theme("spacing"),
+          ...theme("screens"),
+          full: "100%"
+        }),
+        minHeight: theme => ({
+          ...theme("spacing"),
+          ...spacing["palette-units-system-positive-large"],
+          ...spacing["palette-units-system-positive-larger"],
+          full: "100%",
+          viewport: "100vh"
+        }),
+        minWidth: theme => theme("spacing"),
+        negativeMargin: {
+          ...spacing["palette-units-system-positive-smaller-negative"],
+          ...spacing["palette-units-system-positive-small-negative"]
+        },
+        width: theme => ({
+          auto: "auto",
+          ...theme("spacing"),
+          ...theme("screens"),
+          full: "100%"
+        })
       }
-    }
+    };
   }
 );
+
+// box-shadow
+// fonts
+// line-height
+// measure
+// opacity
+// text-indent

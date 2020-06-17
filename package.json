@@ -12,7 +12,7 @@
   "scripts": {
     "build:clean": "rm -rf build",
     "prebuild": "npm run build:clean",
-    "build": "node scripts/build.js",
+    "build": "node scripts/build.js && cp -R node_modules/uswds/dist/fonts build",
     "postinstall": "npm run build"
   },
   "peerDependencies": {
@@ -20,8 +20,10 @@
   },
   "dependencies": {
     "mkdirp": "^1.0.4",
+    "node-sass": "^4.14.1",
+    "sass-extract": "^2.1.0",
     "tailwindcss": "^1.4.6",
-    "uswds": "^2.7.0"
+    "uswds": "uswds/uswds#develop"
   },
   "bugs": {
     "url": "https://github.com/hursey013/tailwindcss-uswds/issues"
