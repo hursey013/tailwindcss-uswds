@@ -45,23 +45,36 @@ function flattenColors(obj) {
 function flattenFonts(obj) {
   return Object.keys(obj)
     .filter(key => obj[key].value.src)
-    .map(key => {
+    .reduce((acc, key) => {
       const {
         roman: { value: normal },
         italic: { value: italic }
       } = obj[key].value.src.value;
+      const dir = key;
+      const family = obj[key].value["display-name"].value;
+      const normalArray = Object.keys(normal)
+        .filter(key => normal[key].value && fontWeights.includes(+key))
+        .map(key => ({
+          dir,
+          family,
+          file: normal[key].value,
+          style: "normal",
+          weight: key
+        }));
+      const italicArray = Object.keys(italic)
+        .filter(key => italic[key].value && fontWeights.includes(+key))
+        .map(key => ({
+          dir,
+          family,
+          file: italic[key].value,
+          style: "italic",
+          weight: key
+        }));
 
-      return {
-        dir: key,
-        family: obj[key].value["display-name"].value,
-        normal: Object.keys(normal)
-          .filter(key => normal[key].value && fontWeights.includes(+key))
-          .reduce((acc, key) => ({ ...acc, [key]: normal[key].value }), {}),
-        italic: Object.keys(italic)
-          .filter(key => italic[key].value && fontWeights.includes(+key))
-          .reduce((acc, key) => ({ ...acc, [key]: italic[key].value }), {})
-      };
-    });
+      acc.push(...normalArray, ...italicArray);
+
+      return acc;
+    }, []);
 }
 
 function flattenFontsWeights(obj) {

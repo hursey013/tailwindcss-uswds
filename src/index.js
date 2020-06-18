@@ -30,22 +30,20 @@ module.exports = plugin.withOptions(
         }
       ];
 
-      // if (options.fontPath) {
-      //   base = [
-      //     ...base,
-      //     fonts.map(font => {
-      //       return {
-      //         "@font-face": {
-      //           fontFamily: font.family,
-      //           fontStyle: font.style,
-      //           fontWeight: font.weight,
-      //           fontDisplay: "fallback",
-      //           src: `url(${options.fontPath}/${font.dir}/${font.file}.woff2) format("woff2"), url(${options.fontPath}/${font.dir}/${font.file}.woff) format("woff"), url(${options.fontPath}/${font.dir}/${font.file}.ttf) format("truetype")`
-      //         }
-      //       };
-      //     })
-      //   ];
-      // }
+      if (options.fontPath) {
+        base = [
+          ...base,
+          ...fonts.map(font => ({
+            "@font-face": {
+              fontFamily: font.family,
+              fontStyle: font.style,
+              fontWeight: font.weight,
+              fontDisplay: "fallback",
+              src: `url(${options.fontPath}/${font.dir}/${font.file}.woff2) format("woff2"), url(${options.fontPath}/${font.dir}/${font.file}.woff) format("woff"), url(${options.fontPath}/${font.dir}/${font.file}.ttf) format("truetype")`
+            }
+          }))
+        ];
+      }
 
       addBase(base);
     };
