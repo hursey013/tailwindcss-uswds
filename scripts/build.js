@@ -10,98 +10,114 @@ const rendered = sassExtract.renderSync({
   )
 });
 
+const filteredProps = [
+  "background-color",
+  "border-color",
+  "box-shadow",
+  "color",
+  "outline-color",
+  "text-decoration-color"
+];
+
+const removePrefixes = ["ls-", "neg"];
+
+const vars = rendered.vars.global;
 const colors = flattenColors(
-  rendered.vars.global["$palettes-color"].value["palette-color"].value
+  vars["$palettes-color"].value["palette-color"].value
 );
-
-const fontWeights = flattenFontsWeights(
-  rendered.vars.global["$project-font-weights"].value
-);
-
-const fonts = flattenFonts(
-  rendered.vars.global["$system-typeface-tokens"].value
-);
-
-const spacing = flattenSpacing({
-  ...rendered.vars.global["$palettes-units"].value,
-  ...rendered.vars.global["$palettes-units-misc"].value
-});
+const fontWeights = objectValueToArray(vars["$project-font-weights"].value);
+const fonts = flattenFontFaces(vars["$system-typeface-tokens"].value);
+const props = flattenValues(vars["$system-properties"].value);
+const spacing = flattenValues(vars["$palettes-units"].value);
 
 function flattenColors(obj) {
   return Object.keys(obj).reduce((acc, key) => {
-    if (obj[key].value) {
-      if (obj[key].value.a !== 1) {
-        acc[
-          key
-        ] = `rgba(${obj[key].value.r}, ${obj[key].value.g}, ${obj[key].value.b}, ${obj[key].value.a})`;
-      } else {
-        acc[key] = obj[key].value.hex;
-      }
+    const color = obj[key].value;
+    if (color) {
+      acc[key] =
+        color.a !== 1
+          ? `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`
+          : color.hex;
     }
     return acc;
   }, {});
 }
 
-function flattenFonts(obj) {
+function flattenFontFaces(obj) {
   return Object.keys(obj)
     .filter(key => obj[key].value.src)
     .reduce((acc, key) => {
-      const {
-        roman: { value: normal },
-        italic: { value: italic }
-      } = obj[key].value.src.value;
       const dir = key;
       const family = obj[key].value["display-name"].value;
-      const normalArray = Object.keys(normal)
-        .filter(key => normal[key].value && fontWeights.includes(+key))
-        .map(key => ({
-          dir,
-          family,
-          file: normal[key].value,
-          style: "normal",
-          weight: key
-        }));
-      const italicArray = Object.keys(italic)
-        .filter(key => italic[key].value && fontWeights.includes(+key))
-        .map(key => ({
-          dir,
-          family,
-          file: italic[key].value,
-          style: "italic",
-          weight: key
-        }));
+      const styles = obj[key].value.src.value;
 
-      acc.push(...normalArray, ...italicArray);
+      Object.keys(styles)
+        .filter(style => style !== "dir")
+        .forEach(style => {
+          const weight = styles[style].value;
+          const array = Object.keys(weight)
+            .filter(key => weight[key].value && fontWeights.includes(+key))
+            .map(key => ({
+              dir,
+              family,
+              file: weight[key].value,
+              style: style === "roman" ? "normal" : style,
+              weight: key
+            }));
+          acc.push(...array);
+        });
 
       return acc;
     }, []);
 }
 
-function flattenFontsWeights(obj) {
+function flattenValues(obj) {
+  return Object.keys(obj)
+    .filter(
+      key =>
+        (obj[key].value || obj[key].value === 0) && !filteredProps.includes(key)
+    )
+    .reduce((acc, key) => {
+      const { unit, value } = obj[key];
+      const newKey = stringToCamelCase(key);
+
+      if (typeof value === "string" && value.includes(",")) {
+        acc[newKey] = value.split();
+        return acc;
+      }
+
+      if (typeof value === "object") {
+        acc[newKey] = flattenValues(value);
+        return acc;
+      }
+
+      acc[newKey] = `${value}${unit ? unit : ""}`;
+      return acc;
+    }, {});
+}
+
+function objectValueToArray(obj) {
   return Object.keys(obj)
     .filter(key => obj[key].value)
     .map(key => obj[key].value);
 }
 
-function flattenSpacing(obj) {
-  return Object.keys(obj).reduce((acc, key) => {
-    if (typeof obj[key].value === "object") {
-      return { ...acc, [key]: flattenSpacing(obj[key].value) };
-    } else {
-      acc[key] = `${obj[key].value}${obj[key].unit ? obj[key].unit : ""}`;
-    }
-    return acc;
-  }, {});
+function stringToCamelCase(str) {
+  return str.replace(/-([a-z])/g, function(g) {
+    return g[1].toUpperCase();
+  });
 }
+
+// TODO: Strip and ignore defined prefixes
 
 console.info("Exctracting USWDS values!");
 
-mkdirp("build").then(made => {
-  fs.writeFileSync("build/colors.json", JSON.stringify(colors));
+mkdirp("dist").then(made => {
+  fs.writeFileSync("dist/colors.json", JSON.stringify(colors));
   console.info(JSON.stringify(colors, null, 4));
-  fs.writeFileSync("build/fonts.json", JSON.stringify(fonts));
+  fs.writeFileSync("dist/fonts.json", JSON.stringify(fonts));
   console.info(JSON.stringify(fonts, null, 4));
-  fs.writeFileSync("build/spacing.json", JSON.stringify(spacing));
-  console.info(JSON.stringify(spacing, null, 4));
+  fs.writeFileSync("dist/props.json", JSON.stringify(props));
+  console.info(JSON.stringify(props, null, 4));
   console.info("Finished extraction.");
 });

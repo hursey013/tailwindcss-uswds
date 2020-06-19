@@ -10,9 +10,9 @@
   "author": "Brian Hurst",
   "license": "MIT",
   "scripts": {
-    "build:clean": "rm -rf build",
+    "build:clean": "rm -rf dist",
     "prebuild": "npm run build:clean",
-    "build": "node scripts/build.js && cp -R node_modules/uswds/dist/fonts build",
+    "build": "node scripts/build.js && cp -R node_modules/uswds/dist/fonts dist",
     "postinstall": "npm run build"
   },
   "peerDependencies": {
@@ -23,7 +23,7 @@
     "node-sass": "^4.14.1",
     "sass-extract": "^2.1.0",
     "tailwindcss": "^1.4.6",
-    "uswds": "uswds/uswds#develop"
+    "uswds": "^2.7.1"
   },
   "bugs": {
     "url": "https://github.com/hursey013/tailwindcss-uswds/issues"

@@ -1,24 +1,39 @@
 const plugin = require("tailwindcss/plugin");
-const colors = require("../build/colors.json");
-const spacing = require("../build/spacing.json");
-const fonts = require("../build/fonts.json");
+const colors = require("../dist/colors.json");
+const fonts = require("../dist/fonts.json");
+const props = require("../dist/props.json");
+
+const {
+  breakpoints,
+  borderRadius,
+  borderWidth,
+  fontFamily,
+  fontWeight,
+  height,
+  letterSpacing,
+  margin,
+  marginHorizontal,
+  marginVertical,
+  maxHeight,
+  maxWidth,
+  minHeight,
+  minWidth,
+  measure,
+  textIndent,
+  width
+} = props;
 
 module.exports = plugin.withOptions(
   function(options = {}) {
-    return function({ addBase, theme }) {
-      let base = [
+    return function({ addBase, addUtilities, e, theme }) {
+      // Base styles
+      const base = [
         {
           a: {
             color: theme("colors.primary"),
-            "&:visited": {
-              color: theme("colors['violet-70v']")
-            },
-            "&:hover": {
-              color: theme("colors['primary-dark']")
-            },
-            "&:active": {
-              color: theme("colors['primary-darker']")
-            }
+            "&:visited": { color: theme("colors['violet-70v']") },
+            "&:hover": { color: theme("colors['primary-dark']") },
+            "&:active": { color: theme("colors['primary-darker']") }
           }
         },
         {
@@ -27,112 +42,64 @@ module.exports = plugin.withOptions(
             color: theme("colors.ink"),
             overflowX: "hidden"
           }
-        }
+        },
+        ...fonts.map(font => ({
+          "@font-face": {
+            fontFamily: font.family,
+            fontStyle: font.style,
+            fontWeight: font.weight,
+            fontDisplay: "fallback",
+            src: `url(${options.fontPath}/${font.dir}/${font.file}.woff2) format("woff2"),
+                  url(${options.fontPath}/${font.dir}/${font.file}.woff) format("woff"),
+                  url(${options.fontPath}/${font.dir}/${font.file}.ttf) format("truetype")`
+          }
+        }))
       ];
 
-      if (options.fontPath) {
-        base = [
-          ...base,
-          ...fonts.map(font => ({
-            "@font-face": {
-              fontFamily: font.family,
-              fontStyle: font.style,
-              fontWeight: font.weight,
-              fontDisplay: "fallback",
-              src: `url(${options.fontPath}/${font.dir}/${font.file}.woff2) format("woff2"), url(${options.fontPath}/${font.dir}/${font.file}.woff) format("woff"), url(${options.fontPath}/${font.dir}/${font.file}.ttf) format("truetype")`
-            }
-          }))
-        ];
-      }
-
       addBase(base);
+
+      // New utilities
+      const uMeasure = Object.keys(measure.standard).map(key => ({
+        [`.${e(`measure-${key}`)}`]: { maxWidth: measure.standard[key] }
+      }));
+
+      const uTextIndent = Object.keys(textIndent.standard).map(key => ({
+        [`.${e(`text-indent-${key}`)}`]: {
+          textIndent: textIndent.standard[key]
+        }
+      }));
+
+      addUtilities([uMeasure, uTextIndent], { variants: ["responsive"] });
     };
   },
   function(options) {
     return {
       theme: {
-        screens: {
-          ...spacing["palette-units-system-positive-large"],
-          ...spacing["palette-units-system-positive-larger"],
-          ...spacing["palette-units-system-positive-largest"]
-        },
         colors,
-        spacing: {
-          ...spacing["palette-units-system-positive-smaller"],
-          ...spacing["palette-units-system-positive-small"],
-          ...spacing["palette-units-system-positive-medium"],
-          ...spacing["palette-units-zero"]
-        },
+        screens: breakpoints.standard,
         borderRadius: {
-          ...spacing["palette-units-system-positive-smaller"],
-          ...spacing["palette-units-system-positive-small"],
-          ...spacing["palette-units-zero"],
-          sm: "2px",
-          md: "4px",
-          lg: "8px",
-          pill: "99rem"
+          ...borderRadius.standard,
+          ...borderRadius.extended
         },
         borderWidth: {
           default: "1px",
-          ...spacing["palette-units-system-positive-smaller"],
-          ...spacing["palette-units-system-positive-small"],
-          ...spacing["palette-units-zero"]
+          ...borderWidth.standard
         },
-        fontFamily: {
-          display: ["Roboto Mono", "sans-serif"],
-          body: ["Roboto Mono", "sans-serif"]
+        fontFamily: fontFamily.standard,
+        fontWeight: fontWeight.standard,
+        height: height.standard,
+        letterSpacing: letterSpacing.standard,
+        margin: {
+          ...margin.standard,
+          ...marginHorizontal.standard,
+          ...marginVertical.standard
         },
-        height: theme => ({
-          auto: "auto",
-          ...theme("spacing"),
-          ...spacing["palette-units-system-positive-large"],
-          full: "100%",
-          viewport: "100vh"
-        }),
-        margin: theme => ({
-          auto: "auto",
-          ...theme("spacing"),
-          ...spacing["palette-units-system-positive-large"]
-        }),
-        maxHeight: theme => ({
-          none: "none",
-          ...theme("spacing"),
-          ...spacing["palette-units-system-positive-large"],
-          ...spacing["palette-units-system-positive-larger"],
-          viewport: "100vh"
-        }),
-        maxWidth: theme => ({
-          none: "none",
-          ...theme("spacing"),
-          ...theme("screens"),
-          full: "100%"
-        }),
-        minHeight: theme => ({
-          ...theme("spacing"),
-          ...spacing["palette-units-system-positive-large"],
-          ...spacing["palette-units-system-positive-larger"],
-          full: "100%",
-          viewport: "100vh"
-        }),
-        minWidth: theme => theme("spacing"),
-        negativeMargin: {
-          ...spacing["palette-units-system-positive-smaller-negative"],
-          ...spacing["palette-units-system-positive-small-negative"]
-        },
-        width: theme => ({
-          auto: "auto",
-          ...theme("spacing"),
-          ...theme("screens"),
-          full: "100%"
-        })
+        maxHeight: maxHeight.standard,
+        maxWidth: maxWidth.standard,
+        minHeight: minHeight.standard,
+        minWidth: minWidth.standard,
+        width: width.standard
       }
     };
   }
 );
-
-// box-shadow
-// fonts
-// line-height
-// measure
-// opacity
-// text-indent
