@@ -3,47 +3,20 @@ const path = require("path");
 const mkdirp = require("mkdirp");
 const sassExtract = require("sass-extract");
 
-const rendered = sassExtract.renderSync({
-  file: path.join(
-    path.dirname(require.resolve("uswds/package.json")),
-    "/src/stylesheets/uswds.scss"
-  )
-});
-
-const filteredProps = [
+const removedPrefixes = ["ls-", "neg"];
+const removedProps = [
   "background-color",
   "border-color",
-  "box-shadow",
   "color",
+  "noValue",
   "outline-color",
   "text-decoration-color"
 ];
+const renamedProps = {
+  breakpoints: "screens"
+};
 
-const removePrefixes = ["ls-", "neg"];
-
-const vars = rendered.vars.global;
-const colors = flattenColors(
-  vars["$palettes-color"].value["palette-color"].value
-);
-const fontWeights = objectValueToArray(vars["$project-font-weights"].value);
-const fonts = flattenFontFaces(vars["$system-typeface-tokens"].value);
-const props = flattenValues(vars["$system-properties"].value);
-const spacing = flattenValues(vars["$palettes-units"].value);
-
-function flattenColors(obj) {
-  return Object.keys(obj).reduce((acc, key) => {
-    const color = obj[key].value;
-    if (color) {
-      acc[key] =
-        color.a !== 1
-          ? `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`
-          : color.hex;
-    }
-    return acc;
-  }, {});
-}
-
-function flattenFontFaces(obj) {
+function flattenFonts(obj, weights) {
   return Object.keys(obj)
     .filter(key => obj[key].value.src)
     .reduce((acc, key) => {
@@ -56,7 +29,7 @@ function flattenFontFaces(obj) {
         .forEach(style => {
           const weight = styles[style].value;
           const array = Object.keys(weight)
-            .filter(key => weight[key].value && fontWeights.includes(+key))
+            .filter(key => weight[key].value && weights.includes(+key))
             .map(key => ({
               dir,
               family,
@@ -75,31 +48,56 @@ function flattenValues(obj) {
   return Object.keys(obj)
     .filter(
       key =>
-        (obj[key].value || obj[key].value === 0) && !filteredProps.includes(key)
+        (obj[key].value || obj[key].value === 0) && !removedProps.includes(key)
     )
     .reduce((acc, key) => {
       const { unit, value } = obj[key];
-      const newKey = stringToCamelCase(key);
 
-      if (typeof value === "string" && value.includes(",")) {
-        acc[newKey] = value.split();
+      if (value.content) {
+        if (value.content.value) {
+          acc[removePrefix(key)] = `${value.content.value}${
+            value.content.unit ? value.content.unit : ""
+          }`;
+        }
+        return acc;
+      }
+
+      if (value.hex) {
+        acc[removePrefix(key)] =
+          value.a !== 1
+            ? `rgba(${value.r}, ${value.g}, ${value.b}, ${value.a})`
+            : value.hex;
         return acc;
       }
 
       if (typeof value === "object") {
-        acc[newKey] = flattenValues(value);
+        acc[
+          stringToCamelCase(renamedProps[key] ? renamedProps[key] : key)
+        ] = flattenValues(value);
         return acc;
       }
 
-      acc[newKey] = `${value}${unit ? unit : ""}`;
+      if (typeof value === "string" && value.includes(",")) {
+        acc[removePrefix(key)] = value
+          .split(", ")
+          .map(s => (s.includes(" ") ? `'${s}'` : s));
+        return acc;
+      }
+
+      acc[removePrefix(key)] = `${value}${unit ? unit : ""}`;
       return acc;
     }, {});
 }
 
-function objectValueToArray(obj) {
+function objToArray(obj) {
   return Object.keys(obj)
     .filter(key => obj[key].value)
     .map(key => obj[key].value);
+}
+
+function removePrefix(str) {
+  const regex = new RegExp(removedPrefixes.join("|"), "gi");
+  return str.replace(regex, "");
 }
 
 function stringToCamelCase(str) {
@@ -108,16 +106,33 @@ function stringToCamelCase(str) {
   });
 }
 
-// TODO: Strip and ignore defined prefixes
+sassExtract
+  .render({
+    file: path.join(
+      path.dirname(require.resolve("uswds/package.json")),
+      "/src/stylesheets/uswds.scss"
+    )
+  })
+  .then(rendered => {
+    const vars = rendered.vars.global;
+    const fonts = flattenFonts(
+      vars["$system-typeface-tokens"].value,
+      objToArray(vars["$project-font-weights"].value)
+    );
+    const props = flattenValues({
+      ...vars["$system-properties"].value,
+      colors: vars["$palettes-color"].value["palette-color"],
+      fontSize: vars["$palette-font"].value["palette-font"],
+      spacing: vars["$palettes-units"].value["palette-units-system-positive"]
+    });
 
-console.info("Exctracting USWDS values!");
+    console.info("Exctracting USWDS values!");
 
-mkdirp("dist").then(made => {
-  fs.writeFileSync("dist/colors.json", JSON.stringify(colors));
-  console.info(JSON.stringify(colors, null, 4));
-  fs.writeFileSync("dist/fonts.json", JSON.stringify(fonts));
-  console.info(JSON.stringify(fonts, null, 4));
-  fs.writeFileSync("dist/props.json", JSON.stringify(props));
-  console.info(JSON.stringify(props, null, 4));
-  console.info("Finished extraction.");
-});
+    mkdirp("dist").then(made => {
+      fs.writeFileSync("dist/fonts.json", JSON.stringify(fonts));
+      console.info(JSON.stringify(fonts, null, 4));
+      fs.writeFileSync("dist/props.json", JSON.stringify(props));
+      console.info(JSON.stringify(props, null, 4));
+      console.info("Finished extraction.");
+    });
+  });
