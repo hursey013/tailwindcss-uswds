@@ -1,16 +1,12 @@
 const plugin = require("tailwindcss/plugin");
 const defaultConfig = require("tailwindcss/defaultConfig");
-const { parseOptions } = require("../scripts/helpers.js");
+const { parseOptions, renameProp } = require("../scripts/helpers.js");
 const fonts = require("../dist/fonts.json");
 const props = require("../dist/props.json");
 
-// TODO: Limit color palette
-
 const defaultOptions = {
-  corePlugins: {
-    borderRadius: {
-      extended: true
-    },
+  overrides: {
+    borderRadius: true,
     borderWidth: {
       defaultValue: "1px"
     },
@@ -18,15 +14,11 @@ const defaultOptions = {
     fontFamily: true,
     fontSize: true,
     fontWeight: true,
+    gap: true,
     height: true,
     letterSpacing: true,
     lineHeight: true,
-    margin: {
-      children: {
-        marginHorizontal: true,
-        marginVertical: true
-      }
-    },
+    margin: true,
     maxHeight: true,
     maxWidth: true,
     measure: true,
@@ -40,14 +32,19 @@ const defaultOptions = {
   }
 };
 
+const convertedFontWeights = {
+  normal: "400",
+  bold: "700"
+};
+
 module.exports = plugin.withOptions(
   function(options) {
     const opts = {
       ...defaultOptions,
       ...options,
-      corePlugins: {
-        ...defaultOptions.corePlugins,
-        ...options.corePlugins
+      overrides: {
+        ...defaultOptions.overrides,
+        ...options.overrides
       }
     };
 
@@ -60,17 +57,21 @@ module.exports = plugin.withOptions(
             overflowX: "hidden"
           }
         },
-        ...fonts.map(font => ({
-          "@font-face": {
-            fontFamily: font.family,
-            fontStyle: font.style,
-            fontWeight: font.weight,
-            fontDisplay: "fallback",
-            src: `url(${options.fontPath}/${font.dir}/${font.file}.woff2) format("woff2"),
-                  url(${options.fontPath}/${font.dir}/${font.file}.woff) format("woff"),
-                  url(${options.fontPath}/${font.dir}/${font.file}.ttf) format("truetype")`
-          }
-        })),
+        ...fonts
+          .filter(font =>
+            Object.values(theme("fontWeight"))
+              .map(weight => renameProp(weight, convertedFontWeights))
+              .includes(font.weight)
+          )
+          .map(font => ({
+            "@font-face": {
+              fontFamily: font.family,
+              fontStyle: font.style,
+              fontWeight: font.weight,
+              fontDisplay: "fallback",
+              src: `url(${options.fontPath}/${font.dir}/${font.file}.woff2) format("woff2"), url(${options.fontPath}/${font.dir}/${font.file}.woff) format("woff"), url(${options.fontPath}/${font.dir}/${font.file}.ttf) format("truetype")`
+            }
+          })),
         ...Object.keys(theme("fontFamily")).map(key => ({
           [`[class*=${e(`text-${key}`)}]`]: {
             fontFamily: theme("fontFamily")[key].join(", ")
@@ -100,14 +101,14 @@ module.exports = plugin.withOptions(
     const opts = {
       ...defaultOptions,
       ...options,
-      corePlugins: {
-        ...defaultOptions.corePlugins,
-        ...options.corePlugins
+      overrides: {
+        ...defaultOptions.overrides,
+        ...options.overrides
       }
     };
 
     return {
-      theme: parseOptions(opts.corePlugins, props)
+      theme: parseOptions(opts.overrides, props)
     };
   }
 );
