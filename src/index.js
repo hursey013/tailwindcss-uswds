@@ -1,14 +1,18 @@
 const plugin = require("tailwindcss/plugin");
-const { parseOptions, renameProp } = require("../scripts/helpers.js");
 const fonts = require("../dist/fonts.json");
 const props = require("../dist/props.json");
 
 const defaultOptions = {
+  fontPath: "~@hursey013/tailwindcss-uswds/dist/fonts",
   overrides: {
     borderRadius: true,
     borderWidth: true,
+    boxShadow: true,
     colors: true,
+    cursor: true,
+    flex: true,
     fontFamily: true,
+    fontFeatureSettings: true,
     fontSize: true,
     fontWeight: true,
     gap: true,
@@ -25,17 +29,13 @@ const defaultOptions = {
     order: true,
     screens: true,
     textIndent: true,
-    width: true
+    width: true,
+    zIndex: true
   }
 };
 
-const convertedFontWeights = {
-  normal: "400",
-  bold: "700"
-};
-
 module.exports = plugin.withOptions(
-  function(options) {
+  function(options = {}) {
     const opts = {
       ...defaultOptions,
       ...options,
@@ -56,9 +56,7 @@ module.exports = plugin.withOptions(
         },
         ...fonts
           .filter(font =>
-            Object.values(theme("fontWeight"))
-              .map(weight => renameProp(weight, convertedFontWeights))
-              .includes(font.weight)
+            Object.values(theme("fontWeight")).includes(font.weight)
           )
           .map(font => ({
             "@font-face": {
@@ -66,24 +64,35 @@ module.exports = plugin.withOptions(
               fontStyle: font.style,
               fontWeight: font.weight,
               fontDisplay: "fallback",
-              src: `url(${options.fontPath}/${font.dir}/${font.file}.woff2) format("woff2"), url(${options.fontPath}/${font.dir}/${font.file}.woff) format("woff"), url(${options.fontPath}/${font.dir}/${font.file}.ttf) format("truetype")`
+              src: `url(${opts.fontPath}/${font.dir}/${font.file}.woff2) format("woff2"),
+                    url(${opts.fontPath}/${font.dir}/${font.file}.woff) format("woff"),
+                    url(${opts.fontPath}/${font.dir}/${font.file}.ttf) format("truetype")`
             }
           })),
         ...Object.keys(theme("fontFamily")).map(key => ({
           [`[class*=${e(`text-${key}`)}]`]: {
-            fontFamily: theme("fontFamily")[key].join(", ")
+            fontFamily: theme("fontFamily")
+              [key].split(", ")
+              .map(s => (s.includes(" ") ? `'${s}'` : s))
           }
         }))
       ];
 
       addBase(base);
 
-      const uMeasure = opts.measure
+      const uMeasure = opts.overrides.measure
         ? Object.keys(theme("measure")).map(key => ({
             [`.${e(`measure-${key}`)}`]: { maxWidth: theme("measure")[key] }
           }))
         : {};
-      const uTextIndent = opts.textIndent
+      const uTabular = opts.overrides.fontFeatureSettings
+        ? Object.keys(theme("fontFeatureSettings")).map(key => ({
+            [`.${e(`text-${key}`)}`]: {
+              fontFeatureSettings: theme("fontFeatureSettings")[key]
+            }
+          }))
+        : {};
+      const uTextIndent = opts.overrides.textIndent
         ? Object.keys(theme("textIndent")).map(key => ({
             [`.${e(`text-indent-${key}`)}`]: {
               textIndent: theme("textIndent")[key]
@@ -91,10 +100,12 @@ module.exports = plugin.withOptions(
           }))
         : {};
 
-      addUtilities([uMeasure, uTextIndent], { variants: ["responsive"] });
+      addUtilities([uMeasure, uTabular, uTextIndent], {
+        variants: ["responsive"]
+      });
     };
   },
-  function(options) {
+  function(options = {}) {
     const opts = {
       ...defaultOptions,
       ...options,
@@ -105,7 +116,18 @@ module.exports = plugin.withOptions(
     };
 
     return {
-      theme: parseOptions(opts.overrides, props)
+      theme: Object.keys(opts.overrides).reduce((acc, key) => {
+        const { extended } = opts.overrides[key];
+
+        if (opts.overrides[key]) {
+          acc[key] = {
+            ...(props[key].standard || props[key]),
+            ...(extended ? props[key].extended : {})
+          };
+        }
+
+        return acc;
+      }, {})
     };
   }
 );

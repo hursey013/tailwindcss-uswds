@@ -10,18 +10,22 @@
   "author": "Brian Hurst",
   "license": "MIT",
   "scripts": {
-    "build:clean": "rm -rf dist",
-    "prebuild": "npm run build:clean",
-    "build": "node scripts/build.js && cp -R node_modules/uswds/dist/fonts dist",
-    "postinstall": "npm run build"
+    "build": "node scripts/build.js && npm run copy",
+    "clean": "rm -rf dist",
+    "copy:fonts": "cp -R node_modules/uswds/dist/fonts dist",
+    "copy:img": "cp -R node_modules/uswds/dist/img dist",
+    "copy": "npm run copy:fonts && npm run copy:img",
+    "mkdirs": "mkdir -p dist",
+    "prebuild": "npm run clean && npm run mkdirs",
+    "prepare": "npm run build"
   },
   "peerDependencies": {
     "tailwindcss": "^1.0"
   },
   "dependencies": {
-    "mkdirp": "^1.0.4",
     "node-sass": "^4.14.1",
     "sass-extract": "^2.1.0",
+    "sass-extract-js": "^0.4.0",
     "tailwindcss": "^1.4.6",
     "uswds": "^2.7.1"
   },

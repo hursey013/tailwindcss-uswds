@@ -1,15 +1,8 @@
 const fs = require("fs");
 const path = require("path");
-const mkdirp = require("mkdirp");
 const sassExtract = require("sass-extract");
-const {
-  extractArrayValues,
-  extractColorValue,
-  extractStringValue,
-  removePrefix,
-  renameProp,
-  stringToCamelCase
-} = require("./helpers.js");
+require("sass-extract/lib/plugins/filter");
+require("sass-extract-js");
 
 const removedPrefixes = ["ls-", "neg"];
 const removedProps = [
@@ -18,30 +11,37 @@ const removedProps = [
   "color",
   "function",
   "outline-color",
+  "palette-color",
   "text-decoration-color"
 ];
 const renamedProps = { breakpoints: "screens", noValue: "default" };
 
-function flattenFonts(obj) {
-  return Object.keys(obj)
-    .filter(key => obj[key].value.src)
-    .reduce((acc, key) => {
-      const {
-        ["display-name"]: { value: family },
-        src: { value: styles }
-      } = obj[key].value;
+const removePrefix = (string, source) => {
+  const regex = new RegExp(source.join("|"), "gi");
+  return string.replace(regex, "");
+};
 
-      Object.keys(styles)
+const renameProp = (key, source) => (source[key] ? source[key] : key);
+
+const stringToCamelCase = string =>
+  string.replace(/-([a-z])/g, g => g[1].toUpperCase());
+
+function parseFonts(obj) {
+  return Object.keys(obj)
+    .filter(key => obj[key].src)
+    .reduce((acc, key) => {
+      const { ["display-name"]: family, src } = obj[key];
+
+      Object.keys(src)
         .filter(style => style !== "dir")
         .forEach(style => {
-          const dir = key;
-          const weight = styles[style].value;
+          const weight = src[style];
           const array = Object.keys(weight)
-            .filter(key => weight[key].value)
+            .filter(key => weight[key])
             .map(key => ({
-              dir,
+              dir: src.dir,
               family,
-              file: weight[key].value,
+              file: weight[key],
               style: style === "roman" ? "normal" : style,
               weight: key
             }));
@@ -52,35 +52,24 @@ function flattenFonts(obj) {
     }, []);
 }
 
-function flattenValues(obj) {
+function parseValues(obj) {
   return Object.keys(obj)
-    .filter(
-      key =>
-        (obj[key].value || obj[key].value === 0) && !removedProps.includes(key)
-    )
+    .filter(key => obj[key] && !removedProps.includes(key))
     .reduce((acc, key) => {
-      const {
-        unit,
-        value: { content, hex, slug },
-        value
-      } = obj[key];
-
-      if (typeof value === "object") {
-        if (content) {
-          if (content.value) {
-            acc[slug.value] = extractStringValue(content);
+      const newKey = removePrefix(
+        renameProp(key, renamedProps),
+        removedPrefixes
+      );
+      if (typeof obj[key] === "object") {
+        if (obj[key].slug) {
+          if (obj[key].content) {
+            acc[obj[newKey].slug] = obj[key].content;
           }
-        } else if (hex) {
-          acc[key] = extractColorValue(value);
         } else {
-          acc[stringToCamelCase(renameProp(key, renamedProps))] = flattenValues(
-            value
-          );
+          acc[stringToCamelCase(newKey)] = parseValues(obj[key]);
         }
       } else {
-        acc[
-          removePrefix(renameProp(key, renamedProps), removedPrefixes)
-        ] = extractStringValue(obj[key]);
+        acc[newKey] = obj[key].toString();
       }
 
       return acc;
@@ -88,54 +77,58 @@ function flattenValues(obj) {
 }
 
 sassExtract
-  .render({
-    file: path.join(
-      path.dirname(require.resolve("uswds/package.json")),
-      "/src/stylesheets/uswds.scss"
-    )
-  })
+  .render(
+    {
+      file: require.resolve("uswds/src/stylesheets/uswds.scss")
+    },
+    {
+      plugins: [
+        {
+          plugin: "filter",
+          options: {
+            only: {
+              props: [
+                "$palettes-color",
+                "$palette-font-system",
+                "$palette-font-theme",
+                "$project-font-weights",
+                "$system-properties",
+                "$system-typeface-tokens"
+              ]
+            }
+          }
+        },
+        { plugin: "sass-extract-js", options: { camelCase: false } }
+      ]
+    }
+  )
   .then(rendered => {
     const {
-      ["$palettes-color"]: { value: palettesColor },
-      ["$palette-font-system"]: { value: paletteFontSystem },
-      ["$palette-font-theme"]: { value: paletteFontTheme },
-      ["$palettes-font-misc"]: { value: paletteFontMisc },
-      ["$system-properties"]: { value: systemProperties },
-      ["$system-typeface-tokens"]: { value: systemTypeFaceTokens }
-    } = rendered.vars.global;
-
-    const {
-      paletteColorRequired,
-      paletteColorBasic,
-      paletteColorTheme,
-      paletteColorState,
-      paletteColorSystem
-    } = flattenValues(palettesColor);
-
-    const {
-      paletteFontSystem: fontSystem,
-      paletteFontTheme: fontTheme
-    } = flattenValues({
-      ...paletteFontMisc,
-      ...paletteFontSystem,
-      ...paletteFontTheme
-    });
-
-    const fonts = flattenFonts(systemTypeFaceTokens);
-    const system = flattenValues(systemProperties);
+      palettesColor: {
+        paletteColorRequired,
+        paletteColorBasic,
+        paletteColorTheme,
+        paletteColorState,
+        paletteColorSystem: colors
+      },
+      paletteFontTheme: { paletteFontTheme: fontTheme },
+      paletteFontSystem: { paletteFontSystem: fontSystem },
+      paletteFontTheme,
+      projectFontWeights,
+      systemProperties,
+      systemTypefaceTokens
+    } = parseValues(rendered.vars);
 
     const props = {
-      ...system,
+      ...systemProperties,
       borderWidth: {
-        ...system.borderWidth,
-        ...system.border,
         standard: {
-          ...system.borderWidth.standard,
-          ...system.border.standard
+          ...systemProperties.borderWidth.standard,
+          ...systemProperties.border.standard
         },
         extended: {
-          ...system.borderWidth.extended,
-          ...system.border.extended
+          ...systemProperties.borderWidth.extended,
+          ...systemProperties.border.extended
         }
       },
       colors: {
@@ -145,39 +138,36 @@ sassExtract
           ...paletteColorTheme,
           ...paletteColorState
         },
-        extended: paletteColorSystem
+        extended: colors
       },
       fontSize: {
         standard: fontTheme,
         extended: fontSystem
       },
+      fontWeight: {
+        standard: projectFontWeights,
+        extended: systemProperties.fontWeight.extended
+      },
       margin: {
-        ...system.margin,
         standard: {
-          ...system.margin.standard,
-          ...system.marginHorizontal.standard,
-          ...system.marginVertical.standard
+          ...systemProperties.margin.standard,
+          ...systemProperties.marginHorizontal.standard,
+          ...systemProperties.marginVertical.standard
         },
         extended: {
-          ...system.margin.extended,
-          ...system.marginHorizontal.extended,
-          ...system.marginVertical.extended
+          ...systemProperties.margin.extended,
+          ...systemProperties.marginHorizontal.extended,
+          ...systemProperties.marginVertical.extended
         }
       }
     };
 
-    ["border", "marginHorizontal", "marginVertical"].forEach(
-      e => delete props[e]
-    );
-
-    console.info("Exctracting USWDS values!");
-
-    mkdirp("dist").then(made => {
-      fs.writeFileSync("dist/colors.json", JSON.stringify(paletteColorSystem));
-      fs.writeFileSync("dist/fonts.json", JSON.stringify(fonts));
-      fs.writeFileSync("dist/props.json", JSON.stringify(props));
-      console.info(JSON.stringify(props, null, 4));
-
-      console.info("Finished extraction.");
+    return { colors, fonts: parseFonts(systemTypefaceTokens), props };
+  })
+  .then(res => {
+    const { colors, fonts, props } = res;
+    Object.keys(res).forEach(key => {
+      fs.writeFileSync(`dist/${key}.json`, JSON.stringify(res[key]));
+      console.info(JSON.stringify(res[key], null, 4));
     });
   });
