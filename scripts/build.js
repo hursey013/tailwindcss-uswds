@@ -17,11 +17,10 @@ const removedProps = [
   "border-color",
   "color",
   "function",
-  "noValue",
   "outline-color",
   "text-decoration-color"
 ];
-const renamedProps = { breakpoints: "screens" };
+const renamedProps = { breakpoints: "screens", noValue: "default" };
 
 function flattenFonts(obj) {
   return Object.keys(obj)
@@ -35,11 +34,12 @@ function flattenFonts(obj) {
       Object.keys(styles)
         .filter(style => style !== "dir")
         .forEach(style => {
+          const dir = key;
           const weight = styles[style].value;
           const array = Object.keys(weight)
             .filter(key => weight[key].value)
             .map(key => ({
-              dir: key,
+              dir,
               family,
               file: weight[key].value,
               style: style === "roman" ? "normal" : style,
@@ -78,7 +78,9 @@ function flattenValues(obj) {
           );
         }
       } else {
-        acc[removePrefix(key, removedPrefixes)] = extractStringValue(obj[key]);
+        acc[
+          removePrefix(renameProp(key, renamedProps), removedPrefixes)
+        ] = extractStringValue(obj[key]);
       }
 
       return acc;
@@ -124,6 +126,18 @@ sassExtract
 
     const props = {
       ...system,
+      borderWidth: {
+        ...system.borderWidth,
+        ...system.border,
+        standard: {
+          ...system.borderWidth.standard,
+          ...system.border.standard
+        },
+        extended: {
+          ...system.borderWidth.extended,
+          ...system.border.extended
+        }
+      },
       colors: {
         standard: {
           ...paletteColorRequired,
@@ -152,12 +166,17 @@ sassExtract
       }
     };
 
+    ["border", "marginHorizontal", "marginVertical"].forEach(
+      e => delete props[e]
+    );
+
     console.info("Exctracting USWDS values!");
 
     mkdirp("dist").then(made => {
       fs.writeFileSync("dist/colors.json", JSON.stringify(paletteColorSystem));
       fs.writeFileSync("dist/fonts.json", JSON.stringify(fonts));
       fs.writeFileSync("dist/props.json", JSON.stringify(props));
+      console.info(JSON.stringify(props, null, 4));
 
       console.info("Finished extraction.");
     });

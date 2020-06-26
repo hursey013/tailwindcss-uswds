@@ -9,23 +9,19 @@ const extractStringValue = ({ unit, value }) =>
     ? extractArrayValues(value)
     : `${value}${unit ? unit : ""}`;
 
-const objToArray = obj => Object.values(obj);
-
-function parseOptions(options, props) {
-  return Object.keys(options).reduce((acc, key) => {
-    const { defaultValue, extended } = options[key];
+const parseOptions = (options, props) =>
+  Object.keys(options).reduce((acc, key) => {
+    const { extended } = options[key];
 
     if (options[key]) {
       acc[key] = {
         ...(props[key].standard || props[key]),
-        ...(extended ? props[key].extended : {}),
-        ...(defaultValue ? { default: defaultValue } : {})
+        ...(extended ? props[key].extended : {})
       };
     }
 
     return acc;
   }, {});
-}
 
 const removePrefix = (string, source) => {
   const regex = new RegExp(source.join("|"), "gi");
@@ -41,7 +37,6 @@ module.exports = {
   extractArrayValues,
   extractColorValue,
   extractStringValue,
-  objToArray,
   parseOptions,
   removePrefix,
   renameProp,

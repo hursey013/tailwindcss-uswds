@@ -1,5 +1,4 @@
 const plugin = require("tailwindcss/plugin");
-const defaultConfig = require("tailwindcss/defaultConfig");
 const { parseOptions, renameProp } = require("../scripts/helpers.js");
 const fonts = require("../dist/fonts.json");
 const props = require("../dist/props.json");
@@ -7,9 +6,7 @@ const props = require("../dist/props.json");
 const defaultOptions = {
   overrides: {
     borderRadius: true,
-    borderWidth: {
-      defaultValue: "1px"
-    },
+    borderWidth: true,
     colors: true,
     fontFamily: true,
     fontSize: true,
