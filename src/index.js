@@ -5,32 +5,33 @@ const props = require("../dist/props.json");
 const defaultOptions = {
   fontPath: "~@hursey013/tailwindcss-uswds/dist/fonts",
   overrides: {
-    borderRadius: true,
-    borderWidth: true,
-    boxShadow: true,
-    colors: true,
-    cursor: true,
-    flex: true,
-    fontFamily: true,
-    fontFeatureSettings: true,
-    fontSize: true,
-    fontWeight: true,
-    gap: true,
-    height: true,
-    letterSpacing: true,
-    lineHeight: true,
-    margin: true,
-    maxHeight: true,
-    maxWidth: true,
-    measure: true,
-    minHeight: true,
-    minWidth: true,
-    opacity: true,
-    order: true,
-    screens: true,
-    textIndent: true,
-    width: true,
-    zIndex: true
+    borderRadius: "standard",
+    borderWidth: "standard",
+    boxShadow: "standard",
+    colors: "standard",
+    cursor: "standard",
+    flex: "standard",
+    fontFamily: "standard",
+    fontFeatureSettings: "standard",
+    fontSize: "standard",
+    fontWeight: "standard",
+    gap: "standard",
+    height: "standard",
+    letterSpacing: "standard",
+    lineHeight: "standard",
+    margin: "standard",
+    maxHeight: "standard",
+    maxWidth: "standard",
+    measure: "standard",
+    minHeight: "standard",
+    minWidth: "standard",
+    opacity: "standard",
+    order: "standard",
+    padding: "standard",
+    screens: "standard",
+    textIndent: "standard",
+    width: "standard",
+    zIndex: "standard"
   }
 };
 
@@ -94,7 +95,11 @@ module.exports = plugin.withOptions(
         : {};
       const uTextIndent = opts.overrides.textIndent
         ? Object.keys(theme("textIndent")).map(key => ({
-            [`.${e(`text-indent-${key}`)}`]: {
+            [`.${e(
+              key.startsWith("-")
+                ? `-text-indent-${key.slice(1)}`
+                : `text-indent-${key}`
+            )}`]: {
               textIndent: theme("textIndent")[key]
             }
           }))
@@ -117,12 +122,12 @@ module.exports = plugin.withOptions(
 
     return {
       theme: Object.keys(opts.overrides).reduce((acc, key) => {
-        const { extended } = opts.overrides[key];
+        const override = opts.overrides[key];
 
-        if (opts.overrides[key]) {
+        if (override) {
           acc[key] = {
-            ...(props[key].standard || props[key]),
-            ...(extended ? props[key].extended : {})
+            ...props[key].standard,
+            ...(override === "extended" ? props[key].extended : {})
           };
         }
 
