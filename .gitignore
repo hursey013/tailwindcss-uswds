@@ -2,7 +2,7 @@
 node_modules
 
 # production
-build
+dist
 
 # misc
 .DS_Store
@@ -10,5 +10,6 @@ build
 npm-debug.log
 yarn-error.log
 yarn.lock
+.env
 .yarnclean
 .vscode

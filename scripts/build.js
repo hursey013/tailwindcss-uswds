@@ -1,52 +1,173 @@
 const fs = require("fs");
 const path = require("path");
-const mkdirp = require("mkdirp");
+const sassExtract = require("sass-extract");
+require("sass-extract/lib/plugins/filter");
+require("sass-extract-js");
 
-function readFilesSync(dir) {
-  const files = [];
+const removedPrefixes = ["ls-", "neg"];
+const removedProps = [
+  "background-color",
+  "border-color",
+  "color",
+  "function",
+  "outline-color",
+  "palette-color",
+  "text-decoration-color"
+];
+const renamedProps = { breakpoints: "screens", noValue: "default" };
 
-  fs.readdirSync(dir).forEach(filename => {
-    const filepath = path.resolve(dir, filename);
-    const stat = fs.statSync(filepath);
-    const isFile = stat.isFile();
-    const contents = fs.readFileSync(dir + filename, "utf8");
+const removePrefix = (string, source) => {
+  const regex = new RegExp(source.join("|"), "gi");
+  return string.replace(regex, "");
+};
 
-    if (isFile) files.push(JSON.parse(contents));
-  });
+const renameProp = (key, source) => (source[key] ? source[key] : key);
 
-  return files;
+const stringToCamelCase = string =>
+  string.replace(/-([a-z])/g, g => g[1].toUpperCase());
+
+function parseFonts(obj) {
+  return Object.keys(obj)
+    .filter(key => obj[key].src)
+    .reduce((acc, key) => {
+      const { ["display-name"]: family, src } = obj[key];
+
+      Object.keys(src)
+        .filter(style => style !== "dir")
+        .forEach(style => {
+          const weight = src[style];
+          const array = Object.keys(weight)
+            .filter(key => weight[key])
+            .map(key => ({
+              dir: src.dir,
+              family,
+              file: weight[key],
+              style: style === "roman" ? "normal" : style,
+              weight: key
+            }));
+          acc.push(...array);
+        });
+
+      return acc;
+    }, []);
 }
 
-function flatten(array, vivid = false) {
-  return array.reduce((acc, item) => {
-    if (Array.isArray(item.value)) {
-      if (item.name === "vivid") {
-        return { ...acc, ...flatten(item.value, true) };
+function parseValues(obj) {
+  return Object.keys(obj)
+    .filter(key => obj[key] && !removedProps.includes(key))
+    .reduce((acc, key) => {
+      const newKey = removePrefix(
+        renameProp(key, renamedProps),
+        removedPrefixes
+      );
+      if (typeof obj[key] === "object") {
+        if (obj[key].slug) {
+          if (obj[key].content) {
+            acc[obj[newKey].slug] = obj[key].content;
+          }
+        } else {
+          acc[stringToCamelCase(newKey)] = parseValues(obj[key]);
+        }
       } else {
-        acc[item.name] = flatten(item.value);
+        acc[newKey] = obj[key].toString();
       }
-    } else {
-      if (item.value) {
-        acc[vivid ? `${item.name}v` : item.name] = item.value;
-      }
-    }
-    return acc;
-  }, {});
+
+      return acc;
+    }, {});
 }
 
-const colors = readFilesSync(
-  path.join(
-    path.dirname(require.resolve("uswds/package.json")),
-    "/src/data/colors/"
+sassExtract
+  .render(
+    {
+      file: require.resolve("uswds/src/stylesheets/uswds.scss")
+    },
+    {
+      plugins: [
+        {
+          plugin: "filter",
+          options: {
+            only: {
+              props: [
+                "$palettes-color",
+                "$palette-font-system",
+                "$palette-font-theme",
+                "$project-font-weights",
+                "$system-properties",
+                "$system-typeface-tokens"
+              ]
+            }
+          }
+        },
+        { plugin: "sass-extract-js", options: { camelCase: false } }
+      ]
+    }
   )
-).reduce((acc, file) => {
-  return { ...acc, ...flatten(file.props) };
-}, {});
+  .then(rendered => {
+    const {
+      palettesColor: {
+        paletteColorRequired,
+        paletteColorBasic,
+        paletteColorTheme,
+        paletteColorState,
+        paletteColorSystem: colors
+      },
+      paletteFontTheme: { paletteFontTheme: fontTheme },
+      paletteFontSystem: { paletteFontSystem: fontSystem },
+      paletteFontTheme,
+      projectFontWeights,
+      systemProperties,
+      systemTypefaceTokens
+    } = parseValues(rendered.vars);
 
-console.info("Building USTWDS color palette!");
+    const props = {
+      ...systemProperties,
+      borderWidth: {
+        standard: {
+          ...systemProperties.borderWidth.standard,
+          ...systemProperties.border.standard
+        },
+        extended: {
+          ...systemProperties.borderWidth.extended,
+          ...systemProperties.border.extended
+        }
+      },
+      colors: {
+        standard: {
+          ...paletteColorRequired,
+          ...paletteColorBasic,
+          ...paletteColorTheme,
+          ...paletteColorState
+        },
+        extended: colors
+      },
+      fontSize: {
+        standard: fontTheme,
+        extended: fontSystem
+      },
+      fontWeight: {
+        standard: projectFontWeights,
+        extended: systemProperties.fontWeight.extended
+      },
+      margin: {
+        standard: {
+          ...systemProperties.margin.standard,
+          ...systemProperties.marginHorizontal.standard,
+          ...systemProperties.marginVertical.standard
+        },
+        extended: {
+          ...systemProperties.margin.extended,
+          ...systemProperties.marginHorizontal.extended,
+          ...systemProperties.marginVertical.extended
+        }
+      }
+    };
 
-mkdirp("build").then(made => {
-  fs.writeFileSync("build/colors.json", JSON.stringify(colors));
-  console.log(JSON.stringify(colors, null, 4));
-  console.log("Finished building.");
-});
+    return { colors, fonts: parseFonts(systemTypefaceTokens), props };
+  })
+  .then(res => {
+    const { colors, fonts, props } = res;
+    Object.keys(res).forEach(key => {
+      fs.writeFileSync(`dist/${key}.json`, JSON.stringify(res[key]));
+      console.info(JSON.stringify(res[key], null, 4));
+    });
+  });
