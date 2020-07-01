@@ -1,6 +1,6 @@
 # U.S. Tailwind Design System
 
-A [TailwindCSS](https://tailwindcss.com/) plugin for adding [U.S. Web Design System](https://designsystem.digital.gov/) design tokens to supported utility classes. For use in utility-first projects that prefer a JavaScript based configuration and do not require USWDS provided components or page templates.
+A [TailwindCSS](https://tailwindcss.com/) plugin for adding [U.S. Web Design System](https://designsystem.digital.gov/) design tokens to supported utility classes. For use in utility-first projects that prefer a JavaScript based configuration and do not require USWDS provided components or page templates out of the box.
 
 ## Install
 
@@ -87,7 +87,7 @@ module.exports = {
 };
 ```
 
-To disable the use of USWDS design tokens for a particular utility (falling back to the defaults provided by Tailwind), pass a value of `false`:
+To disable USWDS design tokens for a particular utility (falling back to the defaults provided by Tailwind), pass a value of `false`:
 
 ```js
 // tailwind.config.js
@@ -131,7 +131,7 @@ Currently `color`, `borderRadius`, `fontSize`, `fontWeight`, `letterSpacing`, `l
 
 ### Utilities
 
-Utility classes follow the default naming conventions provided by Tailwind with USWDS design tokens as values. This creates more terse class names and may sometimes also change the utility name itself:
+Utility classes follow the default naming conventions provided by Tailwind with USWDS design tokens as values. This creates shorter class names and may sometimes also change the utility name itself:
 
 ```css
 /* .border-bottom-1 becomes: */
@@ -186,7 +186,7 @@ Do note that some Tailwind utilities inherit values defined elsewhere in the con
 
 ### Additional utilities
 
-Several USWDS-specific utilities are also provided as part of `tailwindcss-uswds`:
+Several USWDS-specific utilities are provided as part of `tailwindcss-uswds`:
 
 | Key                       | Classes                                                                                                                                 | Reference                                                                              |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
