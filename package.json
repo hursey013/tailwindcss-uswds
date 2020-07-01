@@ -11,12 +11,9 @@
   "license": "MIT",
   "scripts": {
     "build": "node scripts/build.js && npm run copy",
-    "clean": "rm -rf dist",
     "copy:fonts": "cp -R node_modules/uswds/dist/fonts dist",
     "copy:img": "cp -R node_modules/uswds/dist/img dist",
     "copy": "npm run copy:fonts && npm run copy:img",
-    "mkdirs": "mkdir -p dist",
-    "prebuild": "npm run clean && npm run mkdirs",
     "prepare": "npm run build",
     "release": "dotenv release-it"
   },

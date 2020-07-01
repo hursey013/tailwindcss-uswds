@@ -168,6 +168,5 @@ sassExtract
     const { colors, fonts, props } = res;
     Object.keys(res).forEach(key => {
       fs.writeFileSync(`dist/${key}.json`, JSON.stringify(res[key]));
-      console.info(JSON.stringify(res[key], null, 4));
     });
   });
