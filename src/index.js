@@ -95,7 +95,11 @@ module.exports = plugin.withOptions(
         : {};
       const uTextIndent = opts.overrides.textIndent
         ? Object.keys(theme("textIndent")).map(key => ({
-            [`.${e(`text-indent-${key}`)}`]: {
+            [`.${e(
+              key.startsWith("-")
+                ? `-text-indent-${key.slice(1)}`
+                : `text-indent-${key}`
+            )}`]: {
               textIndent: theme("textIndent")[key]
             }
           }))

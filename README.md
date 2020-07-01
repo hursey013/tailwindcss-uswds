@@ -193,3 +193,11 @@ Several USWDS-specific utilities are also provided as part of `tailwindcss-uswds
 | **`measure`**             | `.measure-{none, 1, 2, 3, 4, 5, 6}`                                                                                                     | [USWDS](https://designsystem.digital.gov/utilities/paragraph-styles/#max-width)        |
 | **`fontFeatureSettings`** | `.text-{tabular, no-tabular, }`                                                                                                         | [USWDS](https://designsystem.digital.gov/utilities/text-styles/#font-feature-settings) |
 | **`textIndent`**          | `.text-indent-{-9, -8, -7, -6, -5, -4, -3, -205, -2, -105, -1, -05, -2px, -1px, 0, 1px, 2px, 05, 1, 105, 2, 205, 3, 4, 5, 6, 7, 8, 9 }` | [USWDS](https://designsystem.digital.gov/utilities/paragraph-styles/#text-indent)      |
+
+### Color
+
+More soon...
+
+### Screens
+
+More soon...
