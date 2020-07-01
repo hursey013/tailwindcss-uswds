@@ -27,6 +27,7 @@ const defaultOptions = {
     minWidth: "standard",
     opacity: "standard",
     order: "standard",
+    padding: "standard",
     screens: "standard",
     textIndent: "standard",
     width: "standard",

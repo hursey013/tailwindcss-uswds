@@ -54,7 +54,7 @@ function parseFonts(obj) {
 
 function parseValues(obj) {
   return Object.keys(obj)
-    .filter(key => obj[key] && !removedProps.includes(key))
+    .filter(key => (obj[key] || obj[key] === 0) && !removedProps.includes(key))
     .reduce((acc, key) => {
       const newKey = removePrefix(
         renameProp(key, renamedProps),
