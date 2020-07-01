@@ -17,7 +17,8 @@
     "copy": "npm run copy:fonts && npm run copy:img",
     "mkdirs": "mkdir -p dist",
     "prebuild": "npm run clean && npm run mkdirs",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "release": "release-it"
   },
   "peerDependencies": {
     "tailwindcss": "^1.0"
@@ -27,11 +28,19 @@
     "sass-extract": "^2.1.0",
     "sass-extract-js": "^0.4.0",
     "tailwindcss": "^1.4.6",
-    "uswds": "^2.7.1"
+    "uswds": "2.7.1"
   },
   "bugs": {
     "url": "https://github.com/hursey013/tailwindcss-uswds/issues"
   },
   "homepage": "https://github.com/hursey013/tailwindcss-uswds#readme",
-  "devDependencies": {}
+  "devDependencies": {
+    "dotenv-cli": "^3.2.0",
+    "release-it": "^13.6.4"
+  },
+  "release-it": {
+    "github": {
+      "release": true
+    }
+  }
 }
