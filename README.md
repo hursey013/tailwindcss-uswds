@@ -1,6 +1,6 @@
 # U.S. Tailwind Design System
 
-A [TailwindCSS](https://tailwindcss.com/) plugin for adding [U.S. Web Design System](https://designsystem.digital.gov/) design tokens to supported utility classes. For use in utility-first projects that prefer a JavaScript based configuration and do not require USWDS provided components or page templates out of the box.
+A [TailwindCSS](https://tailwindcss.com/) plugin for adding [U.S. Web Design System](https://designsystem.digital.gov/) design tokens to supported Tailwind utility classes. For use in utility-first projects that favor a JavaScript based configuration and do not require USWDS provided components or page templates out of the box.
 
 ## Install
 
@@ -87,7 +87,7 @@ module.exports = {
 };
 ```
 
-To disable USWDS design tokens for a particular utility (falling back to the defaults provided by Tailwind), pass a value of `false`:
+To prevent USWDS design tokens from overriding the default Tailwind values, pass a value of `false`:
 
 ```js
 // tailwind.config.js
@@ -125,13 +125,13 @@ module.exports = {
 };
 ```
 
-Currently `color`, `borderRadius`, `fontSize`, `fontWeight`, `letterSpacing`, `lineHeight` support the use of the `extended` value.
+Currently `color`, `borderRadius`, `fontSize`, `fontWeight`, `letterSpacing`, and `lineHeight` support `extended`.
 
 ## Usage
 
 ### Utilities
 
-Utility classes follow the default naming conventions provided by Tailwind with USWDS design tokens as values. This creates shorter class names and may sometimes also change the utility name itself:
+Utility classes follow the default naming conventions provided by Tailwind with USWDS design tokens as values. This creates shorter class names and may also in some cases change the utility name itself:
 
 ```css
 /* .border-bottom-1 becomes: */
@@ -186,7 +186,7 @@ Do note that some Tailwind utilities inherit values defined elsewhere in the con
 
 ### Additional utilities
 
-Several USWDS-specific utilities are provided as part of `tailwindcss-uswds`:
+Several USWDS-specific utilities are in addition to the defaults provided by Tailwind:
 
 | Key                       | Classes                                                                                                                                 | Reference                                                                              |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -196,8 +196,152 @@ Several USWDS-specific utilities are provided as part of `tailwindcss-uswds`:
 
 ### Color
 
-More soon...
+By default, `tailwindcss-uswds` provides [theme](https://designsystem.digital.gov/design-tokens/color/theme-tokens/), [state](https://designsystem.digital.gov/design-tokens/color/state-tokens/), and basic color tokens to all color based Tailwind utilities (`.bg-{color}`, `.border-{color}`, and `.text-{color}`). By using `extended` as outlined in the [overrides](#overrides-optional) section, [system](https://designsystem.digital.gov/design-tokens/color/system-tokens/) tokens can be included as well. Do note that including system color tokens will add hundreds of additional colors (and thousands of Tailwind generated utilities), so be sure to use the [purge](https://tailwindcss.com/docs/controlling-file-size/#removing-unused-css) option provided by Tailwind to remove unused CSS.
 
-### Screens
+#### Default color tokens
 
-More soon...
+```js
+// tailwind.config.js
+module.exports = {
+  theme: {
+    // ...
+    colors: {
+      transparent: "rgba(0, 0, 0, 0)",
+      black: "rgb(0, 0, 0)",
+      white: "rgb(255, 255, 255)",
+
+      // Theme color tokens
+      "base-lightest": "rgb(240, 240, 240)",
+      "base-lighter": "rgb(223, 225, 226)",
+      "base-light": "rgb(169, 174, 177)",
+      base: "rgb(113, 118, 122)",
+      "base-dark": "rgb(86, 92, 101)",
+      "base-darker": "rgb(61, 69, 81)",
+      "base-darkest": "rgb(27, 27, 27)",
+      ink: "rgb(27, 27, 27)",
+      "primary-lighter": "rgb(217, 232, 246)",
+      "primary-light": "rgb(115, 179, 231)",
+      primary: "rgb(0, 94, 162)",
+      "primary-vivid": "rgb(0, 80, 216)",
+      "primary-dark": "rgb(26, 68, 128)",
+      "primary-darker": "rgb(22, 46, 81)",
+      "secondary-lighter": "rgb(243, 225, 228)",
+      "secondary-light": "rgb(242, 147, 140)",
+      secondary: "rgb(216, 57, 51)",
+      "secondary-vivid": "rgb(228, 29, 61)",
+      "secondary-dark": "rgb(181, 9, 9)",
+      "secondary-darker": "rgb(139, 10, 3)",
+      "accent-warm-darker": "rgb(119, 85, 64)",
+      "accent-warm-dark": "rgb(192, 86, 0)",
+      "accent-warm": "rgb(250, 148, 65)",
+      "accent-warm-light": "rgb(255, 188, 120)",
+      "accent-warm-lighter": "rgb(242, 228, 212)",
+      "accent-cool-darker": "rgb(7, 100, 141)",
+      "accent-cool-dark": "rgb(40, 160, 203)",
+      "accent-cool": "rgb(0, 189, 227)",
+      "accent-cool-light": "rgb(151, 212, 234)",
+      "accent-cool-lighter": "rgb(225, 243, 248)",
+
+      // State color tokens
+      "info-lighter": "rgb(231, 246, 248)",
+      "info-light": "rgb(153, 222, 234)",
+      info: "rgb(0, 189, 227)",
+      "info-dark": "rgb(0, 158, 193)",
+      "info-darker": "rgb(46, 98, 118)",
+      "error-lighter": "rgb(244, 227, 219)",
+      "error-light": "rgb(243, 146, 104)",
+      error: "rgb(213, 67, 9)",
+      "error-dark": "rgb(181, 9, 9)",
+      "error-darker": "rgb(111, 51, 49)",
+      "warning-lighter": "rgb(250, 243, 209)",
+      "warning-light": "rgb(254, 230, 133)",
+      warning: "rgb(255, 190, 46)",
+      "warning-dark": "rgb(229, 160, 0)",
+      "warning-darker": "rgb(147, 111, 56)",
+      "success-lighter": "rgb(236, 243, 236)",
+      "success-light": "rgb(112, 225, 123)",
+      success: "rgb(0, 169, 28)",
+      "success-dark": "rgb(77, 128, 85)",
+      "success-darker": "rgb(68, 100, 67)",
+      "disabled-light": "rgb(230, 230, 230)",
+      disabled: "rgb(201, 201, 201)",
+      "disabled-dark": "rgb(173, 173, 173)",
+
+      // Basic color tokens
+      red: "rgb(229, 34, 7)",
+      orange: "rgb(230, 111, 14)",
+      gold: "rgb(255, 190, 46)",
+      yellow: "rgb(254, 230, 133)",
+      green: "rgb(83, 130, 0)",
+      mint: "rgb(4, 197, 133)",
+      cyan: "rgb(0, 158, 193)",
+      blue: "rgb(0, 118, 214)",
+      indigo: "rgb(103, 108, 200)",
+      violet: "rgb(129, 104, 179)",
+      magenta: "rgb(215, 45, 121)"
+    }
+    // ...
+  },
+  plugins: [require("@hursey013/tailwindcss-uswds")]
+};
+```
+
+#### Customizing colors
+
+The default USWDS color tokens can be customized by using your project's `tailwind.config.js` file and following the process outlined in the [customizing colors](https://tailwindcss.com/docs/customizing-colors/) docs.
+
+To reference [system](https://designsystem.digital.gov/design-tokens/color/system-tokens/) color tokens directly (without needing to use the `extended` option) you can import the JSON file generated by `tailwindcss-uswds`:
+
+```js
+// tailwind.config.js
+const colors = require("@hursey013/tailwindcss-uswds/dist/colors");
+
+module.exports = {
+  theme: {
+    // ...
+    extend: {
+      colors: {
+        // ...
+        primary: "#007ace",
+        "primary-vivid": colors["blue-warm-50v"]
+        // ...
+      }
+    }
+  },
+  plugins: [require("@hursey013/tailwindcss-uswds")]
+};
+```
+
+### Breakpoints
+
+The default breakpoints provided by USWDS are as follows:
+
+```js
+// tailwind.config.js
+module.exports = {
+  theme: {
+    // ...
+    screens: {
+      card: "10rem"
+      card-lg: "15rem"
+      desktop: "64rem"
+      desktop-lg: "75rem"
+      mobile: "20rem"
+      mobile-lg: "30rem"
+      tablet: "40rem"
+      tablet-lg: "55rem"
+      widescreen: "87.5rem"
+    }
+    // ...
+  },
+  plugins: [require("@hursey013/tailwindcss-uswds")]
+};
+```
+
+### Icons
+
+As an added convenience, all icons provided by USWDS are included in `tailwindcss-uswds`.
+
+```js
+import flag from "@hursey013/tailwindcss-uswds/dist/img/us_flag_small.png";
+```
