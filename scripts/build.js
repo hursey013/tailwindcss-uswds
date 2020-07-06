@@ -4,6 +4,7 @@ const sassExtract = require("sass-extract");
 require("sass-extract/lib/plugins/filter");
 require("sass-extract-js");
 
+const noCamelCase = ["accent-cool", "accent-warm"];
 const removedPrefixes = ["ls-", "neg"];
 const removedProps = [
   "background-color",
@@ -24,9 +25,11 @@ const removePrefix = (string, source) => {
 const renameProp = (key, source) => (source[key] ? source[key] : key);
 
 const stringToCamelCase = string =>
-  string.replace(/-([a-z])/g, g => g[1].toUpperCase());
+  !noCamelCase.includes(string)
+    ? string.replace(/-([a-z])/g, g => g[1].toUpperCase())
+    : string;
 
-function parseFonts(obj) {
+const parseFonts = obj => {
   return Object.keys(obj)
     .filter(key => obj[key].src)
     .reduce((acc, key) => {
@@ -50,9 +53,9 @@ function parseFonts(obj) {
 
       return acc;
     }, []);
-}
+};
 
-function parseValues(obj) {
+const parseValues = obj => {
   return Object.keys(obj)
     .filter(key => (obj[key] || obj[key] === 0) && !removedProps.includes(key))
     .reduce((acc, key) => {
@@ -74,7 +77,17 @@ function parseValues(obj) {
 
       return acc;
     }, {});
-}
+};
+
+const unflattenColors = obj => {
+  return Object.keys(obj).reduce((acc, key) => {
+    const array = key.split("-");
+    const value = array.pop();
+    const newKey = array.join("-");
+
+    return { ...acc, [newKey]: { ...acc[newKey], [value]: obj[key] } };
+  }, {});
+};
 
 sassExtract
   .render(
@@ -88,12 +101,17 @@ sassExtract
           options: {
             only: {
               props: [
-                "$palettes-color",
-                "$palette-font-system",
-                "$palette-font-theme",
+                "$all-project-colors",
                 "$project-font-weights",
                 "$system-properties",
-                "$system-typeface-tokens"
+                "$system-typeface-tokens",
+                "$tokens-color-basic",
+                "$tokens-color-required",
+                "$tokens-color-state",
+                "$tokens-color-system",
+                "$tokens-color-theme",
+                "$tokens-font-system",
+                "$tokens-font-theme"
               ]
             }
           }
@@ -104,20 +122,20 @@ sassExtract
   )
   .then(rendered => {
     const {
-      palettesColor: {
-        paletteColorRequired,
-        paletteColorBasic,
-        paletteColorTheme,
-        paletteColorState,
-        paletteColorSystem: colors
-      },
-      paletteFontTheme: { paletteFontTheme: fontTheme },
-      paletteFontSystem: { paletteFontSystem: fontSystem },
-      paletteFontTheme,
+      allProjectColors,
       projectFontWeights,
       systemProperties,
-      systemTypefaceTokens
+      systemTypefaceTokens,
+      tokensColorBasic,
+      tokensColorRequired,
+      tokensColorState,
+      tokensColorSystem,
+      tokensColorTheme,
+      tokensFontSystem,
+      tokensFontTheme
     } = parseValues(rendered.vars);
+
+    const colors = unflattenColors(tokensColorSystem);
 
     const props = {
       ...systemProperties,
@@ -133,16 +151,15 @@ sassExtract
       },
       colors: {
         standard: {
-          ...paletteColorRequired,
-          ...paletteColorBasic,
-          ...paletteColorTheme,
-          ...paletteColorState
+          ...allProjectColors,
+          ...tokensColorBasic,
+          ...tokensColorRequired
         },
         extended: colors
       },
       fontSize: {
-        standard: fontTheme,
-        extended: fontSystem
+        standard: tokensFontTheme,
+        extended: tokensFontSystem
       },
       fontWeight: {
         standard: projectFontWeights,

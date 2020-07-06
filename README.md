@@ -1,6 +1,6 @@
 # U.S. Tailwind Design System
 
-A [TailwindCSS](https://tailwindcss.com/) plugin for adding [U.S. Web Design System](https://designsystem.digital.gov/) design tokens to supported Tailwind utility classes. For use in utility-first projects that favor a JavaScript based configuration and do not require USWDS provided components or page templates out of the box.
+A [TailwindCSS](https://tailwindcss.com/) plugin for adding [U.S. Web Design System](https://designsystem.digital.gov/) design tokens to supported Tailwind utilities. For use in utility-first projects that favor a JavaScript based configuration and do not require USWDS provided components or page templates out of the box.
 
 ## Install
 
@@ -28,7 +28,7 @@ module.exports = {
 
 ### `fontPath` (optional)
 
-`tailwindcss-uswds` provides the necessary font files in order to generate all required USWDS `@font-face` rules. If you would prefer to copy the font files directly into your project folder you can update the path to the font directory:
+`tailwindcss-uswds` provides the necessary font files in order to generate the required USWDS `@font-face` rules. If you would prefer to copy the font files directly into your project folder you can update the path to the font directory:
 
 ```js
 // tailwind.config.js
@@ -131,7 +131,7 @@ Currently `color`, `borderRadius`, `fontSize`, `fontWeight`, `letterSpacing`, an
 
 ### Utilities
 
-Utility classes follow the default naming conventions provided by Tailwind with USWDS design tokens as values. This creates shorter class names and may also in some cases change the utility name itself:
+Generated utility classes follow the default naming conventions provided by Tailwind with USWDS design tokens as values. This creates shorter class names and may also change the utility classname itself:
 
 ```css
 /* .border-bottom-1 becomes: */
@@ -186,7 +186,7 @@ Do note that some Tailwind utilities inherit values defined elsewhere in the con
 
 ### Additional utilities
 
-Several USWDS-specific utilities are in addition to the defaults provided by Tailwind:
+Several USWDS-specific utilities are available in addition to the defaults provided by Tailwind:
 
 | Key                       | Classes                                                                                                                                 | Reference                                                                              |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -194,9 +194,9 @@ Several USWDS-specific utilities are in addition to the defaults provided by Tai
 | **`fontFeatureSettings`** | `.text-{tabular, no-tabular, }`                                                                                                         | [USWDS](https://designsystem.digital.gov/utilities/text-styles/#font-feature-settings) |
 | **`textIndent`**          | `.text-indent-{-9, -8, -7, -6, -5, -4, -3, -205, -2, -105, -1, -05, -2px, -1px, 0, 1px, 2px, 05, 1, 105, 2, 205, 3, 4, 5, 6, 7, 8, 9 }` | [USWDS](https://designsystem.digital.gov/utilities/paragraph-styles/#text-indent)      |
 
-### Color
+### Colors
 
-By default, `tailwindcss-uswds` provides [theme](https://designsystem.digital.gov/design-tokens/color/theme-tokens/), [state](https://designsystem.digital.gov/design-tokens/color/state-tokens/), and basic color tokens to all color based Tailwind utilities (`.bg-{color}`, `.border-{color}`, and `.text-{color}`). By using `extended` as outlined in the [overrides](#overrides-optional) section, [system](https://designsystem.digital.gov/design-tokens/color/system-tokens/) tokens can be included as well. Do note that including system color tokens will add hundreds of additional colors (and thousands of Tailwind generated utilities), so be sure to use the [purge](https://tailwindcss.com/docs/controlling-file-size/#removing-unused-css) option provided by Tailwind to remove unused CSS.
+By default, `tailwindcss-uswds` provides [theme](https://designsystem.digital.gov/design-tokens/color/theme-tokens/), [state](https://designsystem.digital.gov/design-tokens/color/state-tokens/), and basic color tokens to all color based Tailwind utilities (`.bg-{color}`, `.border-{color}`, and `.text-{color}`). By using the value of `extended` as outlined in the [overrides](#overrides-optional) section, [system](https://designsystem.digital.gov/design-tokens/color/system-tokens/) tokens can be included as well. Do note that including system color tokens will add hundreds of additional colors (and thousands of Tailwind generated utilities), so be sure to use the [purge](https://tailwindcss.com/docs/controlling-file-size/#removing-unused-css) option provided by Tailwind to remove unused CSS.
 
 #### Default color tokens
 
@@ -207,78 +207,100 @@ module.exports = {
     // ...
     colors: {
       transparent: "rgba(0, 0, 0, 0)",
-      black: "rgb(0, 0, 0)",
-      white: "rgb(255, 255, 255)",
+      black: "rgb(0, 0, 0)", // #000000
+      white: "rgb(255, 255, 255)", // #FFFFFF
 
       // Theme color tokens
-      "base-lightest": "rgb(240, 240, 240)",
-      "base-lighter": "rgb(223, 225, 226)",
-      "base-light": "rgb(169, 174, 177)",
-      base: "rgb(113, 118, 122)",
-      "base-dark": "rgb(86, 92, 101)",
-      "base-darker": "rgb(61, 69, 81)",
-      "base-darkest": "rgb(27, 27, 27)",
-      ink: "rgb(27, 27, 27)",
-      "primary-lighter": "rgb(217, 232, 246)",
-      "primary-light": "rgb(115, 179, 231)",
-      primary: "rgb(0, 94, 162)",
-      "primary-vivid": "rgb(0, 80, 216)",
-      "primary-dark": "rgb(26, 68, 128)",
-      "primary-darker": "rgb(22, 46, 81)",
-      "secondary-lighter": "rgb(243, 225, 228)",
-      "secondary-light": "rgb(242, 147, 140)",
-      secondary: "rgb(216, 57, 51)",
-      "secondary-vivid": "rgb(228, 29, 61)",
-      "secondary-dark": "rgb(181, 9, 9)",
-      "secondary-darker": "rgb(139, 10, 3)",
-      "accent-warm-darker": "rgb(119, 85, 64)",
-      "accent-warm-dark": "rgb(192, 86, 0)",
-      "accent-warm": "rgb(250, 148, 65)",
-      "accent-warm-light": "rgb(255, 188, 120)",
-      "accent-warm-lighter": "rgb(242, 228, 212)",
-      "accent-cool-darker": "rgb(7, 100, 141)",
-      "accent-cool-dark": "rgb(40, 160, 203)",
-      "accent-cool": "rgb(0, 189, 227)",
-      "accent-cool-light": "rgb(151, 212, 234)",
-      "accent-cool-lighter": "rgb(225, 243, 248)",
+      base: {
+        lightest: "rgb(240, 240, 240)", // #f0f0f0
+        lighter: "rgb(223, 225, 226)", // #dfe1e2
+        light: "rgb(169, 174, 177)", // #a9aeb1
+        default: "rgb(113, 118, 122)", // #71767a
+        dark: "rgb(86, 92, 101)", // #565c65
+        darker: "rgb(61, 69, 81)", // #3d4551
+        darkest: "rgb(27, 27, 27)" // #1b1b1b
+      },
+      ink: "rgb(27, 27, 27)", // #1b1b1b
+
+      primary: {
+        lighter: "rgb(217, 232, 246)", // #d9e8f6
+        light: "rgb(115, 179, 231)", // #73b3e7
+        default: "rgb(0, 94, 162)", // #005ea2
+        vivid: "rgb(0, 80, 216)", // #0050d8
+        dark: "rgb(26, 68, 128)", // #1a4480
+        darker: "rgb(22, 46, 81)" // #162e51
+      },
+      secondary: {
+        lighter: "rgb(243, 225, 228)", // #f8dfe2
+        light: "rgb(242, 147, 140)", // #f2938c
+        default: "rgb(216, 57, 51)", // #d83933
+        vivid: "rgb(228, 29, 61)", // #e41d3d
+        dark: "rgb(181, 9, 9)", // #b50909
+        darker: "rgb(139, 10, 3)" // #8b0a03
+      },
+      "accent-cool": {
+        darker: "rgb(7, 100, 141)", // #e1f3f8
+        dark: "rgb(40, 160, 203)", // #97d4ea
+        default: "rgb(0, 189, 227)", // #00bde3
+        light: "rgb(151, 212, 234)", // #28a0cb
+        lighter: "rgb(225, 243, 248)" // #07648d
+      },
+      "accent-warm": {
+        lighter: "rgb(242, 228, 212)", // #f2e4d4
+        light: "rgb(255, 188, 120)", // #ffbc78
+        default: "rgb(250, 148, 65)", // #fa9441
+        dark: "rgb(192, 86, 0)", // #c05600
+        darker: "rgb(119, 85, 64)", // #775540
+      },
 
       // State color tokens
-      "info-lighter": "rgb(231, 246, 248)",
-      "info-light": "rgb(153, 222, 234)",
-      info: "rgb(0, 189, 227)",
-      "info-dark": "rgb(0, 158, 193)",
-      "info-darker": "rgb(46, 98, 118)",
-      "error-lighter": "rgb(244, 227, 219)",
-      "error-light": "rgb(243, 146, 104)",
-      error: "rgb(213, 67, 9)",
-      "error-dark": "rgb(181, 9, 9)",
-      "error-darker": "rgb(111, 51, 49)",
-      "warning-lighter": "rgb(250, 243, 209)",
-      "warning-light": "rgb(254, 230, 133)",
-      warning: "rgb(255, 190, 46)",
-      "warning-dark": "rgb(229, 160, 0)",
-      "warning-darker": "rgb(147, 111, 56)",
-      "success-lighter": "rgb(236, 243, 236)",
-      "success-light": "rgb(112, 225, 123)",
-      success: "rgb(0, 169, 28)",
-      "success-dark": "rgb(77, 128, 85)",
-      "success-darker": "rgb(68, 100, 67)",
-      "disabled-light": "rgb(230, 230, 230)",
-      disabled: "rgb(201, 201, 201)",
-      "disabled-dark": "rgb(173, 173, 173)",
+      info: {
+        lighter: "rgb(231, 246, 248)", #e7f6f8
+        light: "rgb(153, 222, 234)", // #99deea
+        default: "rgb(0, 189, 227)", // #00bde3
+        dark: "rgb(0, 158, 193)", // #009ec1
+        darker: "rgb(46, 98, 118)" // #2e6276
+      },
+      error: {
+        lighter: "rgb(244, 227, 219)", // #f4e3db
+        light: "rgb(243, 146, 104)", // #f39268
+        default: "rgb(213, 67, 9)", // #d54309
+        dark: "rgb(181, 9, 9)", // #b50909
+        darker: "rgb(111, 51, 49)" // #6f3331
+
+      },
+      warning: {
+        lighter: "rgb(250, 243, 209)", // #faf3d1
+        light: "rgb(254, 230, 133)", // #fee685
+        default: "rgb(255, 190, 46)", // #ffbe2e
+        dark: "rgb(229, 160, 0)", // #e5a000
+        darker: "rgb(147, 111, 56)" // #936f38
+      },
+      success: {
+        lighter: "rgb(236, 243, 236)", // #ecf3ec
+        light: "rgb(112, 225, 123)", // #70e17b
+        default: "rgb(0, 169, 28)", // #00a91c
+        dark: "rgb(77, 128, 85)", // #4d8055
+        darker: "rgb(68, 100, 67)" // #446443
+      },
+      disabled: {
+        light: "rgb(230, 230, 230)", // #e6e6e6
+        default: "rgb(201, 201, 201)", // #c9c9c9
+        dark: "rgb(173, 173, 173)" // #adadad
+      },
 
       // Basic color tokens
-      red: "rgb(229, 34, 7)",
-      orange: "rgb(230, 111, 14)",
-      gold: "rgb(255, 190, 46)",
-      yellow: "rgb(254, 230, 133)",
-      green: "rgb(83, 130, 0)",
-      mint: "rgb(4, 197, 133)",
-      cyan: "rgb(0, 158, 193)",
-      blue: "rgb(0, 118, 214)",
-      indigo: "rgb(103, 108, 200)",
-      violet: "rgb(129, 104, 179)",
-      magenta: "rgb(215, 45, 121)"
+      red: "rgb(229, 34, 7)", // #e52207
+      orange: "rgb(230, 111, 14)", // #e66f0e
+      gold: "rgb(255, 190, 46)", // #ffbe2e
+      yellow: "rgb(254, 230, 133)", // #fee685
+      green: "rgb(83, 130, 0)", // #538200
+      mint: "rgb(4, 197, 133)", // #04c585
+      cyan: "rgb(0, 158, 193)", // #009ec1
+      blue: "rgb(0, 118, 214)", // #0076d6
+      indigo: "rgb(103, 108, 200)", // #676cc8
+      violet: "rgb(129, 104, 179)", // #8168b3
+      magenta: "rgb(215, 45, 121)" // #d72d79
     }
     // ...
   },
@@ -288,9 +310,9 @@ module.exports = {
 
 #### Customizing colors
 
-The default USWDS color tokens can be customized by using your project's `tailwind.config.js` file and following the process outlined in the [customizing colors](https://tailwindcss.com/docs/customizing-colors/) docs.
+The USWDS based theme can be customized by using your project's `tailwind.config.js` file and following the process outlined in the [customizing colors](https://tailwindcss.com/docs/customizing-colors/) docs.
 
-To reference [system](https://designsystem.digital.gov/design-tokens/color/system-tokens/) color tokens directly (without needing to use the `extended` option) you can import the JSON file generated by `tailwindcss-uswds`:
+To reference [system](https://designsystem.digital.gov/design-tokens/color/system-tokens/) color tokens directly by name (without needing to use the `extended` option) you can import the JSON file generated by `tailwindcss-uswds`:
 
 ```js
 // tailwind.config.js
@@ -302,8 +324,7 @@ module.exports = {
     extend: {
       colors: {
         // ...
-        primary: "#007ace",
-        "primary-vivid": colors["blue-warm-50v"]
+        "primary-vivid": colors["blue-warm"].50v
         // ...
       }
     }
@@ -338,10 +359,20 @@ module.exports = {
 };
 ```
 
+These breakpoints can be used with most utility classes by adding the corresponding prefix:
+
+```html
+<img class="w-5 tablet:w-10 widescreen:w-15" src="..." />
+
+// ...
+```
+
 ### Icons
 
 As an added convenience, all icons provided by USWDS are included in `tailwindcss-uswds`.
 
 ```js
 import flag from "@hursey013/tailwindcss-uswds/dist/img/us_flag_small.png";
+
+// ...
 ```
