@@ -25,7 +25,7 @@
     "sass-extract": "^2.1.0",
     "sass-extract-js": "^0.4.0",
     "tailwindcss": "^1.4.6",
-    "uswds": "^2.7.1"
+    "uswds": "2.8"
   },
   "bugs": {
     "url": "https://github.com/hursey013/tailwindcss-uswds/issues"
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/hursey013/tailwindcss-uswds#readme",
   "devDependencies": {
     "dotenv-cli": "^3.2.0",
-    "release-it": "^13.6.4"
+    "release-it": "^13.6.5"
   },
   "release-it": {
     "github": {
