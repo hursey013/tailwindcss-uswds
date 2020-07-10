@@ -176,7 +176,7 @@ Out of the box, `tailwindcss-uswds` provides the following USWDS design tokens t
 | **`opacity`**       | `.opacity-{0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100}`                                                                                                      | [TW](https://tailwindcss.com/docs/border-radius)&nbsp;\|&nbsp;[USWDS](https://designsystem.digital.gov/utilities/display/#opacity)                        |
 | **`order`**         | `.order-{first, last, initial, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}`                                                                                        | [TW](https://tailwindcss.com/docs/opacity)&nbsp;\|&nbsp;[USWDS](https://designsystem.digital.gov/utilities/flex/#utility-order)                           |
 | **`padding`**       | `.p{t\|r\|b\|l\|x\|y}-{0, 1px, 2px, 05, 1, 105, 2, 205, 3, 4, 5, 6, 7, 8, 9, 10, 15}`                                                                        | [TW](https://tailwindcss.com/docs/padding)&nbsp;\|&nbsp;[USWDS](https://designsystem.digital.gov/utilities/margin-and-padding/#padding)                   |
-| **`screens`**       | See [screens](#screens) section                                                                                                                              |
+| **`screens`**       | See [breakpoints](#breakpoints) section                                                                                                                      |
 | **`width`**         | `.w-{auto, 0, 05, 1, 105, 2, 205, 3, 4, 5, 6, 7, 8, 9, 10, 15, card, card-lg, mobile, mobile-lg, tablet, tablet-lg, desktop, desktop-lg, widescreen, full}`  | [TW](https://tailwindcss.com/docs/width)&nbsp;\|&nbsp;[USWDS](https://designsystem.digital.gov/utilities/height-and-width/#width)                         |
 | **`zIndex`**        | `.z-{auto, bottom, top, 0, 100, 200, 300, 400, 500}`                                                                                                         | [TW](https://tailwindcss.com/docs/z-index)&nbsp;\|&nbsp;[USWDS](https://designsystem.digital.gov/utilities/display/#z-index)                              |
 
@@ -343,14 +343,14 @@ module.exports = {
   theme: {
     // ...
     screens: {
-      card: "10rem"
-      card-lg: "15rem"
-      desktop: "64rem"
-      desktop-lg: "75rem"
-      mobile: "20rem"
-      mobile-lg: "30rem"
-      tablet: "40rem"
-      tablet-lg: "55rem"
+      card: "10rem",
+      "card-lg": "15rem",
+      desktop: "64rem",
+      "desktop-lg": "75rem",
+      mobile: "20rem",
+      "mobile-lg": "30rem",
+      tablet: "40rem",
+      "tablet-lg": "55rem",
       widescreen: "87.5rem"
     }
     // ...
