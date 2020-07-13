@@ -324,7 +324,10 @@ module.exports = {
     extend: {
       colors: {
         // ...
-        "primary-vivid": colors["blue-warm"].50v
+        primary: {
+          ...colors.primary,
+          vivid: colors["blue-warm"].50v
+        }
         // ...
       }
     }
