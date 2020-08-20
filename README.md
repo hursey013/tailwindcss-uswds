@@ -208,7 +208,7 @@ module.exports = {
     colors: {
       transparent: "rgba(0, 0, 0, 0)",
       black: "rgb(0, 0, 0)", // #000000
-      white: "rgb(255, 255, 255)", // #FFFFFF
+      white: "rgb(255, 255, 255)", // #ffffff
 
       // Theme color tokens
       base: {
@@ -255,7 +255,7 @@ module.exports = {
 
       // State color tokens
       info: {
-        lighter: "rgb(231, 246, 248)", #e7f6f8
+        lighter: "rgb(231, 246, 248)", // #e7f6f8
         light: "rgb(153, 222, 234)", // #99deea
         default: "rgb(0, 189, 227)", // #00bde3
         dark: "rgb(0, 158, 193)", // #009ec1
